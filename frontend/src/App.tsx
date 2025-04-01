@@ -1,9 +1,7 @@
+import ProjectsPage from './pages/ProjectsPage';
+
 function App() {
-  return (
-    <div>
-      <h1>Aggregator MVP</h1>
-    </div>
-  );
+  return <ProjectsPage />;
 }
 
 export default App;
