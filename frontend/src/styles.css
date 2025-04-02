@@ -1,16 +1,15 @@
+@import "tailwindcss";
+
 @font-face {
-    font-family: "Saliec-Regular";
-    src: url("./assets/fonts/saliec-regular.otf") format("opentype");
-  }
-  
-  @font-face {
-    font-family: "Saliec-Light";
-    src: url("./assets/fonts/saliec-light.ttf") format("truetype");
-  }
-  
-  body {
-    font-family: "Saliec-Regular", sans-serif;
-    margin: 0;
-    padding: 0;
-  }
-  
+  font-family: "Saliec-Regular";
+  src: url("./assets/fonts/Sailec-Regular.otf") format("opentype");
+}
+
+@font-face {
+  font-family: "Saliec-Light";
+  src: url("./assets/fonts/Saliec-Light.ttf") format("truetype");
+}
+
+body {
+  font-family: "Saliec-Regular", sans-serif;
+}
