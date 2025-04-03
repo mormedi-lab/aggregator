@@ -1,5 +1,8 @@
 from agents import Agent, Runner, WebSearchTool
 from dotenv import load_dotenv
+import re 
+import requests
+from bs4 import BeautifulSoup
 
 load_dotenv()
 
@@ -16,21 +19,31 @@ You are a strategic research assistant that takes a well-scoped search prompt an
     tools=[WebSearchTool()]
 )
 
-async def find_sources(prompt: str) -> list[str]:
+def extract_title_from_url(url: str) -> str:
+    try:
+        response = requests.get(url, timeout=5, headers={"User-Agent": "Mozilla/5.0"})
+        soup = BeautifulSoup(response.content, "html.parser")
+        title = soup.title.string.strip() if soup.title and soup.title.string else "Untitled"
+        return title
+    except Exception:
+        return "Untitled"
+
+async def find_sources(prompt: str) -> list[dict[str, str]]:
     result = await Runner.run(find_sources_agent, prompt)
 
-    # Try to extract URLs from the final output
-    links = []
-    if isinstance(result.final_output, str):
-        for line in result.final_output.splitlines():
-            if "http" in line:
-                links.append(line.strip())
+    url_pattern = r'https?://\S+'
+    links = re.findall(url_pattern, result.final_output or "")
 
-    # Optionally, extract from tool_uses if no links found yet
-    if not links and hasattr(result, "tool_uses"):
+    if hasattr(result, "tool_uses"):
         for tool_call in result.tool_uses:
-            if tool_call.output and "http" in tool_call.output:
-                links.append(tool_call.output.strip())
+            if tool_call.output:
+                links.extend(re.findall(url_pattern, tool_call.output))
 
-    return links
+    results = []
+    for link in links:
+        title = extract_title_from_url(link)
+        results.append({"url": link, "title": title})
+
+    return results
+
 

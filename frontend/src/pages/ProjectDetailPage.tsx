@@ -191,7 +191,7 @@ const ProjectDetailPage: React.FC = () => {
                   const sourceData = await sourceResponse.json();
               
                   // Step 3: Navigate to Source Roundup page with sources
-                  navigate("/source-roundup", { state: { sources: sourceData.sources } });
+                  navigate(`/projects/${projectId}/sources`, { state: { sources: sourceData.sources } });
                 } catch (err) {
                   console.error("Error generating prompt and fetching sources:", err);
                 }

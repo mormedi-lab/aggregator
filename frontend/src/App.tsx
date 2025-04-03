@@ -8,8 +8,8 @@ const App = () => {
     <Router>
       <Routes>
         <Route path="/" element={<ProjectsPage />} />
-        <Route path="/project/:id" element={<ProjectDetailPage />} />
-        <Route path="/source-roundup" element={<SourceRoundupPage />} />
+        <Route path="/project/:projectId" element={<ProjectDetailPage />} />
+        <Route path="/projects/:projectId/sources" element={<SourceRoundupPage />} />
       </Routes>
     </Router>
   );

@@ -5,6 +5,9 @@ from bson.objectid import ObjectId
 from typing import Dict
 from app.agents.prompt_generator.agent import generate_prompt
 from app.agents.find_sources.agent import find_sources
+from fastapi import APIRouter
+from bs4 import BeautifulSoup
+import httpx
 
 router = APIRouter()
 
@@ -42,4 +45,18 @@ async def find_sources_route(request: Request):
     results = await find_sources(search_prompt)
     return {"sources": results}
 
-
+@router.post("/fetch_metadata")
+async def fetch_metadata(url: str):
+    try:
+        async with httpx.AsyncClient(timeout=10) as client:
+            response = await client.get(url)
+            soup = BeautifulSoup(response.text, "html.parser")
+            title = soup.title.string.strip() if soup.title else "No title"
+            description = soup.find("meta", attrs={"name": "description"})
+            if description and description.get("content"):
+                description = description["content"].strip()
+            else:
+                description = "No description found"
+            return {"title": title, "description": description}
+    except Exception as e:
+        return {"title": "Error", "description": str(e)}
