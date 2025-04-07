@@ -5,7 +5,7 @@ from bson.objectid import ObjectId
 from typing import Dict
 from app.agents.prompt_generator.agent import generate_prompt
 from app.agents.find_sources.agent import find_sources
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from bs4 import BeautifulSoup
 import httpx
 
@@ -28,6 +28,24 @@ async def get_projects():
             "lastAccessed": project.get("lastAccessed", "2025-01-01"),  # fallback
         })
     return projects
+
+@router.get("/projects/{project_id}")
+async def get_project(project_id: str):
+    try:
+        obj_id = ObjectId(project_id)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid project ID")
+
+    project = await db.projects.find_one({"_id": obj_id})
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found")
+
+    return {
+        "_id": str(project["_id"]),
+        "name": project["name"],
+        "description": project.get("description", ""),
+        "lastAccessed": project.get("lastAccessed", "2025-01-01"),
+    }
 
 @router.post("/generate_prompt")
 async def generate_prompt_route(form_answers: dict):
@@ -60,3 +78,17 @@ async def fetch_metadata(url: str):
             return {"title": title, "description": description}
     except Exception as e:
         return {"title": "Error", "description": str(e)}
+
+@router.delete("/api/projects/{project_id}")
+async def delete_project(project_id: str):
+    try:
+        object_id = ObjectId(project_id)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid project ID")
+
+    project = await db.projects.find_one({"_id": object_id})
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found")
+
+    await db.projects.delete_one({"_id": object_id})
+    return {"message": "Project deleted successfully"}

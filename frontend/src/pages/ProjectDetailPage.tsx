@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 
 const ProjectDetailPage: React.FC = () => {
   const { projectId } = useParams<{ projectId: string }>();
+  const [projectName, setProjectName] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const [answers, setAnswers] = useState({
     q1: '',
@@ -20,9 +22,22 @@ const ProjectDetailPage: React.FC = () => {
 
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const fetchProjectName = async () => {
+      try {
+        const res = await fetch(`http://localhost:8000/projects/${projectId}`);
+        const data = await res.json();
+        setProjectName(data.name);
+      } catch (err) {
+        console.error("Failed to fetch project:", err);
+      }
+    };
+    fetchProjectName();
+  }, [projectId]);
+
   return (
     <div className="p-8">
-      <h1 className="text-3xl font-saliec">Project: {projectId}</h1>
+      <h1 className="text-3xl font-saliec">Project: {projectName}</h1>
       <div className="mt-8 space-y-6 max-w-3xl">
         {/* Question 1 */}
         <div>
@@ -169,39 +184,68 @@ const ProjectDetailPage: React.FC = () => {
         </div>
 
         <button
+            disabled={loading}
             onClick={async () => {
                 try {
-                  // Step 1: Generate prompt
-                  const promptResponse = await fetch("http://localhost:8000/generate_prompt", {
+                setLoading(true);
+
+                const promptResponse = await fetch("http://localhost:8000/generate_prompt", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(answers),
-                  });
-              
-                  const promptData = await promptResponse.json();
-                  const generatedPrompt = promptData.prompt;
-              
-                  // Step 2: Find sources using the prompt
-                  const sourceResponse = await fetch("http://localhost:8000/find_sources", {
+                });
+
+                const promptData = await promptResponse.json();
+                const generatedPrompt = promptData.prompt;
+
+                const sourceResponse = await fetch("http://localhost:8000/find_sources", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ search_prompt: generatedPrompt }),
-                  });
-              
-                  const sourceData = await sourceResponse.json();
-              
-                  // Step 3: Navigate to Source Roundup page with sources
-                  navigate(`/projects/${projectId}/sources`, { state: { sources: sourceData.sources } });
+                });
+
+                const sourceData = await sourceResponse.json();
+
+                navigate(`/projects/${projectId}/sources`, {
+                    state: { sources: sourceData.sources },
+                });
                 } catch (err) {
-                  console.error("Error generating prompt and fetching sources:", err);
+                console.error("Error generating prompt and fetching sources:", err);
+                alert("Something went wrong.");
+                } finally {
+                setLoading(false);
                 }
             }}
-            className="mt-8 bg-[#FF5500] text-white px-6 py-3 rounded-xl font-saliec hover:bg-[#e64a00] transition-all"
+            className={`mt-8 px-6 py-3 rounded-xl font-saliec flex items-center space-x-2 transition-all ${
+                loading
+                ? 'bg-gray-400 cursor-not-allowed text-white'
+                : 'bg-[#FF5500] text-white hover:bg-[#e64a00]'
+            }`}
             >
-            Generate Search Prompt
+            {loading && (
+                <svg
+                className="animate-spin h-5 w-5 text-white"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                >
+                <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                />
+                <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.372 0 0 5.372 0 12h4z"
+                />
+                </svg>
+            )}
+            <span>{loading ? "Generating..." : "Generate Search Prompt"}</span>
         </button>
-
-
     </div>
   );
 };

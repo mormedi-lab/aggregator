@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import ProjectCard from '../components/ProjectCard';
 import NewProjectModal from '../components/NewProjectModal';
+import ConfirmDeleteModal from '../components/ConfirmDeleteModal';
 import { Project } from '../types';
-import { fetchProjects, createProject } from '../api';
+import { fetchProjects, createProject, deleteProject } from '../api';
 
 const ProjectsPage = () => {
   const [showModal, setShowModal] = useState(false);
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
+  const [projectToDelete, setProjectToDelete] = useState<Project | null>(null);
 
   const handleCreate = async (name: string, description?: string) => {
     try {
@@ -16,6 +18,18 @@ const ProjectsPage = () => {
     } catch (error) {
       console.error(error);
       alert("Error creating project.");
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!projectToDelete) return;
+    try {
+      await deleteProject(projectToDelete._id);
+      setProjects(projects.filter(p => p._id !== projectToDelete._id));
+      setProjectToDelete(null);
+    } catch (error) {
+      console.error("Failed to delete project:", error);
+      alert("Error deleting project.");
     }
   };
 
@@ -58,6 +72,7 @@ const ProjectsPage = () => {
               name={project.name}
               lastAccessed={project.lastAccessed}
               description={project.description}
+              onDelete={() => setProjectToDelete(project)}
             />
           ))
         ) : (
@@ -65,11 +80,21 @@ const ProjectsPage = () => {
         )}
       </div>
 
-      {/* Modal */}
+      {/* Create Modal */}
       {showModal && (
         <NewProjectModal
           onClose={() => setShowModal(false)}
           onCreate={handleCreate}
+        />
+      )}
+
+      {/* Delete Modal */}
+      {projectToDelete && (
+        <ConfirmDeleteModal
+          title="Delete this project?"
+          description="This will remove the project from your dashboard. This action cannot be undone."
+          onCancel={() => setProjectToDelete(null)}
+          onConfirm={handleDelete}
         />
       )}
     </div>

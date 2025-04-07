@@ -27,3 +27,17 @@ export async function createProject(name: string, description?: string): Promise
     lastAccessed: new Date().toISOString().split("T")[0],
   };
 }
+
+export async function deleteProject(id: string) {
+  const response = await fetch(`http://localhost:8000/api/projects/${id}`, {
+    method: 'DELETE',
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to delete project");
+  }
+
+  return await response.json();
+}
+
+
