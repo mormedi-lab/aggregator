@@ -45,15 +45,6 @@ aggregator/
 
 ---
 
-## 🧩 Features
-
-- Project creation and scope definition via form
-- AI agent-generated search prompts
-- Real-time source discovery and validation
-- Interactive source roundup and library view
-
----
-
 ## 🛠 Requirements
 
 - Node.js (v18+)
