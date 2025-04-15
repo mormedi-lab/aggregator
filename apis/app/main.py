@@ -1,23 +1,18 @@
+from typing import List, Optional
+
+from dotenv import load_dotenv
 from fastapi import FastAPI, Body, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
-from typing import List
-from neo4j import GraphDatabase
-import os
-from dotenv import load_dotenv
 
-load_dotenv()
+from app.config import neo4j_client
 
-# Neo4j config
-NEO4J_URI = os.getenv("NEO4J_URI")
-NEO4J_USER = os.getenv("NEO4J_USER")
-NEO4J_PASSWORD = os.getenv("NEO4J_PASSWORD")
+# Load environment variables from .env file
+load_dotenv(dotenv_path="conf/.env")
+driver = neo4j_client()
 
-#runs queries against the graph DB 
-driver = GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USER, NEO4J_PASSWORD))
-
-#entry point of FastAPI
+# entry point of FastAPI
 app = FastAPI()
 
 app.add_middleware(
@@ -28,15 +23,20 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-from pydantic import BaseModel
-from typing import List, Optional
 
 class ProjectCreate(BaseModel):
     title: str
     industry: str
 
+
 class Project(ProjectCreate):
     last_accessed: Optional[str] = None
+
+
+@app.get("/")
+def status():
+    return {"status": "OK"}
+
 
 @app.get("/projects", response_model=List[Project])
 def get_projects():
@@ -55,6 +55,7 @@ def get_projects():
             for record in result
         ]
         return projects
+
 
 @app.post("/projects")
 def create_project(data: Project = Body(...)):

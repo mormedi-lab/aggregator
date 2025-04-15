@@ -51,7 +51,10 @@ lib-cov
 # ========== Env files ==========
 .env
 frontend/.env
-backend/.env
+apis/conf/.env
+apis/conf/.env.prod
+apis/tools/create_secrets.py
+
 
 # ========== Misc ==========
 .node_repl_history
