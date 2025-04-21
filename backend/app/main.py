@@ -1,12 +1,12 @@
-# backend/app/main.py
-from fastapi import FastAPI
+from fastapi import FastAPI, Body
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from typing import List
 from neo4j import GraphDatabase
 import os
 
-# Example: read from env
+# Neo4j config
 NEO4J_URI = os.getenv("NEO4J_URI")
 NEO4J_USER = os.getenv("NEO4J_USER")
 NEO4J_PASSWORD = os.getenv("NEO4J_PASSWORD")
@@ -23,9 +23,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-class Project(BaseModel):
+# Two models
+class ProjectCreate(BaseModel):
     title: str
     description: str
+
+class Project(ProjectCreate):
     last_accessed: str
 
 @app.get("/projects", response_model=List[Project])
@@ -36,13 +39,27 @@ def get_projects():
             RETURN p.title AS title, p.description AS description, p.last_accessed AS last_accessed
             ORDER BY p.last_accessed DESC
         """)
-        projects = [
+        return [
             {
-                "title": record["title"],
-                "description": record["description"],
-                "last_accessed": record["last_accessed"]
+                "title": r["title"],
+                "description": r["description"],
+                "last_accessed": r["last_accessed"]
             }
-            for record in result
+            for r in result
         ]
-        return projects
 
+@app.post("/projects")
+def create_project(data: ProjectCreate = Body(...)):
+    with driver.session() as session:
+        session.run(
+            """
+            CREATE (p:Project {
+                title: $title,
+                description: $description,
+                last_accessed: date()
+            })
+            """,
+            title=data.title,
+            description=data.description,
+        )
+    return JSONResponse(content={"status": "success"})

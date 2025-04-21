@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { fetchProjects } from "../api";
+import { useNavigate } from "react-router-dom";
 
 type Project = {
   title: string;
@@ -10,6 +11,7 @@ type Project = {
 function ProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchProjects()
@@ -25,7 +27,10 @@ function ProjectsPage() {
           <h1 className="text-4xl font-semibold text-[#0F1122]">
             Your Research Spaces
           </h1>
-          <button className="bg-[#F84C39] hover:bg-[#F83A27] text-white px-5 py-2 rounded-md text-sm font-medium shadow-md">
+          <button
+            onClick={() => navigate("/new")}
+            className="bg-[#F84C39] hover:bg-[#F83A27] text-white px-5 py-2 rounded-md text-sm font-medium shadow-md"
+          >
             + New Project
           </button>
         </div>
