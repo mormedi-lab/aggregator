@@ -31,7 +31,7 @@ class ProjectCreate(BaseModel):
 class Project(ProjectCreate):
     last_accessed: str
 
-@app.get("/projects", response_model=List[Project])
+@@app.get("/projects", response_model=List[Project])
 def get_projects():
     with driver.session() as session:
         result = session.run("""
@@ -39,15 +39,15 @@ def get_projects():
             RETURN p.title AS title, p.description AS description, p.last_accessed AS last_accessed
             ORDER BY p.last_accessed DESC
         """)
-        projects = [
+        return [
             {
                 "title": r["title"],
                 "description": r["description"],
-                "last_accessed": r["last_accessed"] 
+                "last_accessed": str(r["last_accessed"]) 
             }
             for r in result
         ]
-        return projects
+
 
 
 @app.post("/projects")
