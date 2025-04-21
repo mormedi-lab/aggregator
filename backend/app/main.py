@@ -5,6 +5,9 @@ from pydantic import BaseModel
 from typing import List
 from neo4j import GraphDatabase
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Neo4j config
 NEO4J_URI = os.getenv("NEO4J_URI")
