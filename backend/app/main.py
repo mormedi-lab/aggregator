@@ -39,14 +39,16 @@ def get_projects():
             RETURN p.title AS title, p.description AS description, p.last_accessed AS last_accessed
             ORDER BY p.last_accessed DESC
         """)
-        return [
+        projects = [
             {
                 "title": r["title"],
                 "description": r["description"],
-                "last_accessed": r["last_accessed"]
+                "last_accessed": r["last_accessed"] 
             }
             for r in result
         ]
+        return projects
+
 
 @app.post("/projects")
 def create_project(data: ProjectCreate = Body(...)):
