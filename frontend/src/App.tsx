@@ -1,18 +1,14 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import ProjectsPage from './pages/ProjectsPage';
-import ProjectDetailPage from './pages/ProjectDetailPage';
-import SourceRoundupPage from './pages/SourceRoundupPage';
+import { useEffect } from "react";
+import { pingBackend } from "./api";
 
-const App = () => {
-  return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<ProjectsPage />} />
-        <Route path="/project/:projectId" element={<ProjectDetailPage />} />
-        <Route path="/projects/:projectId/sources" element={<SourceRoundupPage />} />
-      </Routes>
-    </Router>
-  );
-};
+function App() {
+  useEffect(() => {
+    pingBackend()
+      .then((data) => console.log("Backend says:", data))
+      .catch((err) => console.error("Backend error:", err));
+  }, []);
+
+  return <div className="p-4 text-xl">Hello from frontend!</div>;
+}
 
 export default App;
