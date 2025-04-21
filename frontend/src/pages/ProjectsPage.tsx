@@ -13,6 +13,7 @@ function ProjectsPage() {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
+  //lists all existing projects by calling GET /projects.
   useEffect(() => {
     fetchProjects()
       .then((data) => setProjects(data))

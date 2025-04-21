@@ -7,6 +7,7 @@ function ProjectDefinitionPage() {
   const [industry, setIndustry] = useState("");
   const navigate = useNavigate();
 
+  //form that sends project data to backend via POST /projects.
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
