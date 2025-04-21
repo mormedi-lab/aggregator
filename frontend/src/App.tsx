@@ -1,14 +1,16 @@
-import { useEffect } from "react";
-import { pingBackend } from "./api";
+import { Routes, Route } from "react-router-dom";
+import LoginPage from "./pages/LoginPage";
+import ProjectsPage from "./pages/ProjectsPage";
 
 function App() {
-  useEffect(() => {
-    pingBackend()
-      .then((data) => console.log("Backend says:", data))
-      .catch((err) => console.error("Backend error:", err));
-  }, []);
-
-  return <div className="p-4 text-xl">Hello from frontend!</div>;
+  return (
+    <div className="p-6">
+      <Routes>
+        <Route path="/" element={<LoginPage />} />
+        <Route path="/projects" element={<ProjectsPage />} />
+      </Routes>
+    </div>
+  );
 }
 
 export default App;
