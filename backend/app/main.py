@@ -23,10 +23,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Two models
-class ProjectCreate(BaseModel):
+class Project(BaseModel):
     title: str
-    description: str
+    industry: str
+    last_accessed: str = None  # Optional, set automatically
 
 class Project(ProjectCreate):
     last_accessed: str
@@ -36,35 +36,35 @@ def get_projects():
     with driver.session() as session:
         result = session.run("""
             MATCH (p:Project)
-            RETURN p.title AS title, p.description AS description, p.last_accessed AS last_accessed
+            RETURN p.title AS title, p.industry AS industry, p.last_accessed AS last_accessed
             ORDER BY p.last_accessed DESC
         """)
-        return [
+        projects = [
             {
-                "title": r["title"],
-                "description": r["description"],
-                "last_accessed": str(r["last_accessed"]) 
+                "title": record["title"],
+                "industry": record["industry"],
+                "last_accessed": str(record["last_accessed"])  # Convert Neo4j date to string
             }
-            for r in result
+            for record in result
         ]
-
-
+        return projects
 
 @app.post("/projects")
-def create_project(data: ProjectCreate = Body(...)):
+def create_project(data: Project = Body(...)):
     with driver.session() as session:
         session.run(
             """
             CREATE (p:Project {
                 title: $title,
-                description: $description,
+                industry: $industry,
                 last_accessed: date()
             })
             """,
             title=data.title,
-            description=data.description,
+            industry=data.industry,
         )
     return JSONResponse(content={"status": "success"})
+
 
 @app.delete("/projects")
 def delete_project(title: str = Query(...)):
