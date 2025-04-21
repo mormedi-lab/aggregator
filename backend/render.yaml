@@ -1,0 +1,14 @@
+# backend/render.yaml
+services:
+  - type: web
+    name: mormedi-fastapi-backend
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port 10000
+    envVars:
+      - key: NEO4J_URI
+        value: neo4j+s://528285e5.databases.neo4j.io
+      - key: NEO4J_USER
+        value: neo4j
+      - key: NEO4J_PASSWORD
+        value: HqEKFIl-yHY16c4cG3NTS_ixrLXjwGxh4VP9Yj-7Wfg
