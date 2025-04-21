@@ -23,13 +23,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-class Project(BaseModel):
+from pydantic import BaseModel
+from typing import List, Optional
+
+class ProjectCreate(BaseModel):
     title: str
     industry: str
-    last_accessed: str = None  # Optional, set automatically
 
 class Project(ProjectCreate):
-    last_accessed: str
+    last_accessed: Optional[str] = None
 
 @app.get("/projects", response_model=List[Project])
 def get_projects():
