@@ -8,7 +8,7 @@ export async function fetchProjects() {
 
 export async function createProject(project: {
   title: string;
-  description: string;
+  industry: string;
 }) {
   const res = await fetch(`${API}/projects`, {
     method: "POST",

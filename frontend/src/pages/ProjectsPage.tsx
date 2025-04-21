@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 type Project = {
   title: string;
-  description: string;
+  industry: string;
   last_accessed: string;
 };
 
@@ -65,7 +65,7 @@ function ProjectsPage() {
                     ✕
                   </button>
                 </div>
-                <p className="text-sm text-[#555]">{project.description}</p>
+                <p className="text-sm text-[#555]">{project.industry}</p>
                 <p className="mt-3 text-xs text-[#999]">
                   Last accessed {project.last_accessed}
                 </p>
