@@ -31,7 +31,7 @@ class ProjectCreate(BaseModel):
 class Project(ProjectCreate):
     last_accessed: str
 
-@@app.get("/projects", response_model=List[Project])
+@app.get("/projects", response_model=List[Project])
 def get_projects():
     with driver.session() as session:
         result = session.run("""
