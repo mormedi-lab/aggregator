@@ -11,12 +11,12 @@
   src: url("./assets/fonts/Saliec-Light.ttf") format("truetype");
 }
 
-/* Reset and apply background */
 html,
 body {
   margin: 0;
   padding: 0;
-  background-color: #0F1122;
+  background-color: #F8F8F8; /* matches your screenshot */
   font-family: "Saliec-Regular", sans-serif;
   height: 100%;
 }
+
