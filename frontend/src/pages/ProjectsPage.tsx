@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { fetchProjects } from "../api";
+import { fetchProjects, deleteProject } from "../api";
 import { useNavigate } from "react-router-dom";
 
 type Project = {
@@ -19,6 +19,16 @@ function ProjectsPage() {
       .catch((err) => console.error(err))
       .finally(() => setLoading(false));
   }, []);
+
+  const handleDelete = async (title: string) => {
+    try {
+      await deleteProject(title);
+      const updated = await fetchProjects();
+      setProjects(updated);
+    } catch (err) {
+      console.error("Failed to delete project:", err);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#F9F9F9] px-8 py-12">
@@ -48,7 +58,10 @@ function ProjectsPage() {
                   <h2 className="text-lg font-semibold text-[#0F1122]">
                     {project.title}
                   </h2>
-                  <button className="text-sm text-gray-400 hover:text-black">
+                  <button 
+                    onClick={() => handleDelete(project.title)}
+                    className="text-sm text-gray-400 hover:text-black"
+                  >
                     ✕
                   </button>
                 </div>

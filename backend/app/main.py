@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Body
+from fastapi import FastAPI, Body, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
@@ -65,3 +65,15 @@ def create_project(data: ProjectCreate = Body(...)):
             description=data.description,
         )
     return JSONResponse(content={"status": "success"})
+
+@app.delete("/projects")
+def delete_project(title: str = Query(...)):
+    with driver.session() as session:
+        session.run(
+            """
+            MATCH (p:Project {title: $title})
+            DETACH DELETE p
+            """,
+            title=title
+        )
+    return {"status": "deleted"}

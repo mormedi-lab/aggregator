@@ -21,3 +21,13 @@ export async function createProject(project: {
   if (!res.ok) throw new Error("Failed to create project");
   return res.json();
 }
+
+export async function deleteProject(title: string) {
+  const res = await fetch(`${API}/projects?title=${encodeURIComponent(title)}`, {
+    method: "DELETE",
+  });
+
+  if (!res.ok) throw new Error("Failed to delete project");
+  return res.json();
+}
+
