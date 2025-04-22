@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { fetchProjects, deleteProject } from "../api";
 import { useNavigate } from "react-router-dom";
+import DeleteConfirmationModal from '../components/DeleteConfirmationModal';
 
 type Project = {
   title: string;
@@ -13,6 +14,38 @@ function ProjectsPage() {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
+  const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [projectToDelete, setProjectToDelete] = useState<{ id: string; name: string } | null>(null);
+
+  const handleDeleteClick = (id: string, name: string) => {
+    setProjectToDelete({ id, name });
+    setDeleteModalOpen(true);
+  };
+  
+  const confirmDelete = async () => {
+    if (!projectToDelete) return;
+  
+    try {
+      await deleteProject(projectToDelete.name);
+  
+      // 🔁 Update local projects state
+      setProjects(prev =>
+        prev.filter(p => p.title !== projectToDelete.name)
+      );
+  
+    } catch (err) {
+      console.error('Error deleting project:', err);
+    } finally {
+      setDeleteModalOpen(false);
+      setProjectToDelete(null);
+    }
+  };  
+  
+  const cancelDelete = () => {
+    setDeleteModalOpen(false);
+    setProjectToDelete(null);
+  };
+
   //lists all existing projects by calling GET /projects.
   useEffect(() => {
     fetchProjects()
@@ -20,16 +53,6 @@ function ProjectsPage() {
       .catch((err) => console.error(err))
       .finally(() => setLoading(false));
   }, []);
-
-  const handleDelete = async (title: string) => {
-    try {
-      await deleteProject(title);
-      const updated = await fetchProjects();
-      setProjects(updated);
-    } catch (err) {
-      console.error("Failed to delete project:", err);
-    }
-  };
 
   return (
     <div className="min-h-screen bg-[#F9F9F9] px-8 py-12">
@@ -60,7 +83,7 @@ function ProjectsPage() {
                     {project.title}
                   </h2>
                   <button 
-                    onClick={() => handleDelete(project.title)}
+                    onClick={() => handleDeleteClick(project.title, project.title)}
                     className="text-sm text-gray-400 hover:text-black"
                   >
                     ✕
@@ -75,6 +98,13 @@ function ProjectsPage() {
           </div>
         )}
       </div>
+      <DeleteConfirmationModal
+        isOpen={isDeleteModalOpen}
+        projectName={projectToDelete?.name || ''}
+        onConfirm={confirmDelete}
+        onCancel={cancelDelete}
+      />
+
     </div>
   );
 }
