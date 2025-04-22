@@ -20,6 +20,8 @@ dist-ssr/
 # ========== Python ==========
 functions/__pycache__/
 functions/venv/
+__pycache__/
+**/__pycache__/
 
 # ========== Firebase ==========
 .firebase/
