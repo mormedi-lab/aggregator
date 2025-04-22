@@ -1,18 +1,18 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import ProjectsPage from './pages/ProjectsPage';
-import ProjectDetailPage from './pages/ProjectDetailPage';
-import SourceRoundupPage from './pages/SourceRoundupPage';
+import { Routes, Route } from "react-router-dom";
+import LoginPage from "./pages/LoginPage";
+import ProjectsPage from "./pages/ProjectsPage";
+import ProjectDefinitionPage from "./pages/ProjectDefinitionPage";
 
-const App = () => {
+function App() {
   return (
-    <Router>
+    <div className="p-6">
       <Routes>
-        <Route path="/" element={<ProjectsPage />} />
-        <Route path="/project/:projectId" element={<ProjectDetailPage />} />
-        <Route path="/projects/:projectId/sources" element={<SourceRoundupPage />} />
+        <Route path="/" element={<LoginPage />} />
+        <Route path="/projects" element={<ProjectsPage />} />
+        <Route path="/new" element={<ProjectDefinitionPage />} />
       </Routes>
-    </Router>
+    </div>
   );
-};
+}
 
 export default App;

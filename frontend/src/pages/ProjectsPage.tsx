@@ -1,104 +1,82 @@
-import { useState, useEffect } from 'react';
-import ProjectCard from '../components/ProjectCard';
-import NewProjectModal from '../components/NewProjectModal';
-import ConfirmDeleteModal from '../components/ConfirmDeleteModal';
-import { Project } from '../types';
-import { fetchProjects, createProject, deleteProject } from '../api';
+import { useEffect, useState } from "react";
+import { fetchProjects, deleteProject } from "../api";
+import { useNavigate } from "react-router-dom";
 
-const ProjectsPage = () => {
-  const [showModal, setShowModal] = useState(false);
+type Project = {
+  title: string;
+  industry: string;
+  last_accessed: string;
+};
+
+function ProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
-  const [projectToDelete, setProjectToDelete] = useState<Project | null>(null);
+  const navigate = useNavigate();
 
-  const handleCreate = async (name: string, description?: string) => {
-    try {
-      const newProject = await createProject(name, description);
-      setProjects([newProject, ...projects]);
-    } catch (error) {
-      console.error(error);
-      alert("Error creating project.");
-    }
-  };
-
-  const handleDelete = async () => {
-    if (!projectToDelete) return;
-    try {
-      await deleteProject(projectToDelete._id);
-      setProjects(projects.filter(p => p._id !== projectToDelete._id));
-      setProjectToDelete(null);
-    } catch (error) {
-      console.error("Failed to delete project:", error);
-      alert("Error deleting project.");
-    }
-  };
-
+  //lists all existing projects by calling GET /projects.
   useEffect(() => {
-    const load = async () => {
-      try {
-        const data = await fetchProjects();
-        setProjects(data);
-      } catch (error) {
-        console.error("Failed to fetch projects:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    load();
+    fetchProjects()
+      .then((data) => setProjects(data))
+      .catch((err) => console.error(err))
+      .finally(() => setLoading(false));
   }, []);
 
-  return (
-    <div className="p-8">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-semibold font-saliec">Your Projects</h1>
-        <button
-          onClick={() => setShowModal(true)}
-          className="bg-[#FF5500] text-white px-4 py-2 rounded-xl hover:bg-[#e64a00] transition-all font-saliec"
-        >
-          + New Project
-        </button>
-      </div>
+  const handleDelete = async (title: string) => {
+    try {
+      await deleteProject(title);
+      const updated = await fetchProjects();
+      setProjects(updated);
+    } catch (err) {
+      console.error("Failed to delete project:", err);
+    }
+  };
 
-      {/* Project List */}
-      <div>
+  return (
+    <div className="min-h-screen bg-[#F9F9F9] px-8 py-12">
+      <div className="max-w-7xl mx-auto">
+        <div className="flex justify-between items-center mb-10">
+          <h1 className="text-4xl font-semibold text-[#0F1122]">
+            Your Research Spaces
+          </h1>
+          <button
+            onClick={() => navigate("/new")}
+            className="bg-[#F84C39] hover:bg-[#F83A27] text-white px-5 py-2 rounded-md text-sm font-medium shadow-md"
+          >
+            + New Project
+          </button>
+        </div>
+
         {loading ? (
-          <p className="font-saliec text-gray-500">Loading projects...</p>
-        ) : projects.length > 0 ? (
-          projects.map((project) => (
-            <ProjectCard
-              key={project._id}
-              _id={project._id}
-              name={project.name}
-              lastAccessed={project.lastAccessed}
-              description={project.description}
-              onDelete={() => setProjectToDelete(project)}
-            />
-          ))
+          <p className="text-sm text-gray-400">Loading...</p>
         ) : (
-          <p className="font-saliec text-gray-500">No projects yet.</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+            {projects.map((project, index) => (
+              <div
+                key={index}
+                className="bg-[#F2F2F2] p-5 rounded-xl shadow-sm border border-[#E6E6E6]"
+              >
+                <div className="flex justify-between items-start mb-2">
+                  <h2 className="text-lg font-semibold text-[#0F1122]">
+                    {project.title}
+                  </h2>
+                  <button 
+                    onClick={() => handleDelete(project.title)}
+                    className="text-sm text-gray-400 hover:text-black"
+                  >
+                    ✕
+                  </button>
+                </div>
+                <p className="text-sm text-[#555]">{project.industry}</p>
+                <p className="mt-3 text-xs text-[#999]">
+                  Last accessed {project.last_accessed}
+                </p>
+              </div>
+            ))}
+          </div>
         )}
       </div>
-
-      {/* Create Modal */}
-      {showModal && (
-        <NewProjectModal
-          onClose={() => setShowModal(false)}
-          onCreate={handleCreate}
-        />
-      )}
-
-      {/* Delete Modal */}
-      {projectToDelete && (
-        <ConfirmDeleteModal
-          title="Delete this project?"
-          description="This will remove the project from your dashboard. This action cannot be undone."
-          onCancel={() => setProjectToDelete(null)}
-          onConfirm={handleDelete}
-        />
-      )}
     </div>
   );
-};
+}
 
 export default ProjectsPage;
