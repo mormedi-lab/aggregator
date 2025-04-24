@@ -27,6 +27,15 @@ function App() {
         }
       />
 
+      <Route
+        path="/project/:id"
+        element={
+          <AppLayout>
+            <ProjectDefinitionPage />
+          </AppLayout>
+        }
+      />
+
       {/* Fallback redirect */}
       <Route path="*" element={<Navigate to="/projects" replace />} />
     </Routes>
