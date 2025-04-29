@@ -4,8 +4,10 @@ import { useNavigate } from "react-router-dom";
 import DeleteConfirmationModal from '../components/DeleteConfirmationModal';
 
 type Project = {
+  id: string;
   title: string;
   industry: string;
+  objective: string;
   last_accessed: string;
 };
 
@@ -26,11 +28,10 @@ function ProjectsPage() {
     if (!projectToDelete) return;
   
     try {
-      await deleteProject(projectToDelete.name);
+      await deleteProject(projectToDelete.id);
   
-      // 🔁 Update local projects state
       setProjects(prev =>
-        prev.filter(p => p.title !== projectToDelete.name)
+        prev.filter(p => p.id !== projectToDelete.id)
       );
   
     } catch (err) {
@@ -49,10 +50,15 @@ function ProjectsPage() {
   //lists all existing projects by calling GET /projects.
   useEffect(() => {
     fetchProjects()
-      .then((data) => setProjects(data))
+      .then((data) => {
+        const cleaned = data.filter((p: any) => p.id);
+        setProjects(cleaned);
+      })
       .catch((err) => console.error(err))
       .finally(() => setLoading(false));
   }, []);
+  
+  
 
   return (
     <div className="min-h-screen bg-[#F9F9F9] px-8 py-12">
@@ -76,14 +82,18 @@ function ProjectsPage() {
             {projects.map((project, index) => (
               <div
                 key={index}
-                className="bg-[#F2F2F2] p-5 rounded-xl shadow-sm border border-[#E6E6E6]"
+                onClick={() => navigate(`/project/${project.id}`)}
+                className="bg-[#F2F2F2] p-5 rounded-xl shadow-sm border border-[#E6E6E6] cursor-pointer hover:shadow-md transition"
               >
                 <div className="flex justify-between items-start mb-2">
                   <h2 className="text-lg font-semibold text-[#0F1122]">
                     {project.title}
                   </h2>
                   <button 
-                    onClick={() => handleDeleteClick(project.title, project.title)}
+                    onClick={(e) => {
+                      e.stopPropagation(); 
+                      handleDeleteClick(project.id, project.title);
+                    }}
                     className="text-sm text-gray-400 hover:text-black"
                   >
                     ✕
