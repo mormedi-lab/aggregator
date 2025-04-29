@@ -1,16 +1,19 @@
 # Aggregator
 
-Aggregator is an internal AI-powered benchmarking tool designed to automate the "external context" research phase in strategic consulting projects. It collects high-quality primary sources from the web using LLM agents, allowing consultants to accelerate research, maintain consistency, and generate strategic insights faster.
+Aggregator is an internal AI-powered benchmarking tool designed to automate the "external context" research phase in
+strategic consulting projects. It collects high-quality primary sources from the web using LLM agents, allowing
+consultants to accelerate research, maintain consistency, and generate strategic insights faster.
 
 ## Table of Contents
+
 - [Prerequisites](#prerequisites)
 - [Getting Started](#getting-started)
-  - [Clone the Repository](#clone-the-repository)
-  - [Backend Setup](#backend-setup)
-  - [Frontend Setup](#frontend-setup)
+    - [Clone the Repository](#clone-the-repository)
+    - [Backend Setup](#backend-setup)
+    - [Frontend Setup](#frontend-setup)
 - [Running the Application](#running-the-application)
-  - [Start the Backend](#start-the-backend)
-  - [Start the Frontend](#start-the-frontend)
+    - [Start the Backend](#start-the-backend)
+    - [Start the Frontend](#start-the-frontend)
 - [Environment Configuration](#environment-configuration)
 - [Troubleshooting](#troubleshooting)
 
@@ -20,7 +23,8 @@ Before setting up the Aggregator tool, ensure you have the following installed:
 
 - [Node.js](https://nodejs.org/) (v14 or higher)
 - [npm](https://www.npmjs.com/) (usually comes with Node.js)
-- [Python](https://www.python.org/) (v3.8 or higher)
+- [GCloud](https://cloud.google.com/sdk/docs/install) (GCloud to have access to the secret)
+- [Python](https://www.python.org/) (v3.11)
 - [pip](https://pip.pypa.io/en/stable/installation/) (Python package manager)
 - [Neo4j](https://neo4j.com/download/) (local instance or remote access)
 - [Docker](https://www.docker.com/products/docker-desktop/) (recommended for Neo4j setup)
@@ -78,11 +82,11 @@ cd backend
 
 ```bash
 # On Windows
-python -m venv venv
+python3.11 -m venv venv
 .\venv\Scripts\activate
 
 # On macOS/Linux
-python -m venv venv
+python3.11 -m venv venv
 source venv/bin/activate
 ```
 
@@ -98,7 +102,7 @@ pip install -r requirements.txt
    ```bash
    cp .env.example .env
    ```
-   
+
    Then edit the `.env` file with your specific configuration values:
    ```
    NEO4J_URI=bolt://localhost:7687
@@ -126,7 +130,7 @@ npm install
    ```bash
    cp .env.example .env
    ```
-   
+
    Or create it manually with:
    ```
    VITE_API_URL=http://localhost:8000
@@ -157,7 +161,7 @@ source venv/bin/activate
 3. Start the backend server:
 
 ```bash
-uvicorn app:app --reload
+uvicorn app.main:app --reload
 ```
 
 The backend will be available at http://localhost:8000.
@@ -182,20 +186,27 @@ The frontend will be available at http://localhost:5173 (or a similar port if 51
 
 ## Environment Configuration
 
-For security and flexibility, Aggregator uses environment variables for configuration. We've included two example files (`.env.example`) in the repository that show the required variables.
+For security and flexibility, Aggregator uses environment variables for configuration. We've included two example
+files (`.env.local`) in the repository that show the required variables.
 
 ### Backend Environment Variables
 
-| Variable | Description | Example Value |
-|----------|-------------|---------------|
-| NEO4J_URI | URI for connecting to Neo4j database | bolt://localhost:7687 |
-| NEO4J_USER | Neo4j database username | neo4j |
-| NEO4J_PASSWORD | Neo4j database password | *your secure password* |
+The backend uses a `.env` file for configuration, this file must be here `apis/conf/.env`. You can create this file by copying the example provided:
+
+```bash
+cp apis/conf/.env.local apis/conf/.env
+```
+
+| Variable       | Description                          | Example Value          |
+|----------------|--------------------------------------|------------------------|
+| NEO4J_URI      | URI for connecting to Neo4j database | bolt://localhost:7687  |
+| NEO4J_USER     | Neo4j database username              | neo4j                  |
+| NEO4J_PASSWORD | Neo4j database password              | *your secure password* |
 
 ### Frontend Environment Variables
 
-| Variable | Description | Example Value |
-|----------|-------------|---------------|
+| Variable     | Description            | Example Value         |
+|--------------|------------------------|-----------------------|
 | VITE_API_URL | URL of the backend API | http://localhost:8000 |
 
 ## Troubleshooting
@@ -203,17 +214,50 @@ For security and flexibility, Aggregator uses environment variables for configur
 ### Common Issues
 
 1. **Neo4j Connection Errors**
-   - Ensure Neo4j is running: `docker ps` to check if the container is active
-   - Restart Neo4j if needed: `docker restart aggregator-neo4j`
-   - Verify credentials in the `.env` file match what you set in the Docker command
-   - Check that the Neo4j ports are accessible with `curl localhost:7474` or visiting in your browser
+    - Ensure Neo4j is running: `docker ps` to check if the container is active
+    - Restart Neo4j if needed: `docker restart aggregator-neo4j`
+    - Verify credentials in the `.env` file match what you set in the Docker command
+    - Check that the Neo4j ports are accessible with `curl localhost:7474` or visiting in your browser
 
 2. **Backend Startup Failures**
-   - Ensure all dependencies are installed
-   - Verify Python version compatibility
-   - Check for errors in the console output
+    - Ensure all dependencies are installed
+    - Verify Python version compatibility
+    - Check for errors in the console output
 
 3. **Frontend Build or Run Issues**
-   - Clear npm cache: `npm cache clean --force`
-   - Delete `node_modules` and reinstall: `rm -rf node_modules && npm install`
-   - Ensure Node.js version is compatible
+    - Clear npm cache: `npm cache clean --force`
+    - Delete `node_modules` and reinstall: `rm -rf node_modules && npm install`
+    - Ensure Node.js version is compatible
+
+## Manage secrets with GCP
+
+The backend uses Google Cloud Platform (GCP) to manage secrets.
+To set up and use GCP for managing secrets, follow these steps:
+
+#### 1. Install the gcloud CLI
+
+Follow the instructions on the [Google Cloud CLI installation page](https://cloud.google.com/sdk/docs/install).
+
+#### 2. Set up ADC for a local development environment
+
+- After installing the Google Cloud CLI, initialize it with the project `mormedi-aggregator-456814` by running the
+  following command:
+
+#### 3. Create a new secret if necessary
+
+Update the values `prod_env` (the name of the secret) and `apis/conf/.env.prod` (the path to the file you want to store as a secret) as needed.
+```bash
+gcloud secrets create prod_env --data-file apis/conf/.env.prod
+```
+
+#### 4. Update an existing secret if necessary
+
+Update the values `prod_env` (the name of the secret) and `apis/conf/.env.prod` (the path to the file you want to store as a secret) as needed.
+```bash
+gcloud secrets versions add prod_env --data-file apis/conf/.env.prod
+```
+
+#### 5. Access the secret in your code
+```bash
+gcloud secrets versions access "latest" --secret "prod_env"
+```
