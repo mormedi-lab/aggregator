@@ -5,6 +5,7 @@ from pathlib import Path
 
 from app.routes.project_routes import router as project_router
 from app.routes.benchmark_routes import router as benchmark_router
+from app.routes.prompt_routes import router as prompt_router
 
 # Load from absolute path using pathlib
 env_path = Path(__file__).parent.parent / "conf" / ".env"
@@ -22,3 +23,5 @@ app.add_middleware(
 
 app.include_router(project_router)
 app.include_router(benchmark_router)
+app.include_router(prompt_router)
+
