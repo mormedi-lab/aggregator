@@ -45,8 +45,17 @@ const BenchmarkForm = () => {
     setFormData({ ...formData, source_type: type });
   };
 
+  const isFormEmpty = () => {
+    const { source_type, ...textFields } = formData;
+    return Object.values(textFields).every((val) => val.trim() === "");
+  };  
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isFormEmpty()){
+      alert("Please fill in at least one benchmark field before continuing.");
+      return;
+    }
     try {
         await saveBenchmark({
           project_id: projectId!,
@@ -105,9 +114,18 @@ const BenchmarkForm = () => {
       ))}
 
       <div className="flex gap-4">
-        <button type="submit" className="bg-[#F84C39] text-white px-6 py-2 rounded">
+        <button
+          type="submit"
+          disabled={isFormEmpty()}
+          className={`px-6 py-2 rounded text-white transition ${
+            isFormEmpty()
+              ? "bg-gray-300 cursor-not-allowed"
+              : "bg-[#F84C39] hover:bg-[#f64024]"
+          }`}
+        >
           Start Research
         </button>
+
         <button
           type="button"
           onClick={() =>
