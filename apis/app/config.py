@@ -3,7 +3,12 @@ import os
 
 from neo4j import GraphDatabase
 from neo4j import Driver
+from dotenv import load_dotenv
+from pathlib import Path
 
+# Load from absolute path using pathlib
+env_path = Path(__file__).parent.parent / "conf" / ".env"
+load_dotenv(dotenv_path=env_path)
 
 def load_conf(key: str):
     """
