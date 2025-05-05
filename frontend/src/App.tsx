@@ -4,6 +4,7 @@ import LoginPage from "./pages/LoginPage";
 import ProjectsPage from "./pages/ProjectsPage";
 import ProjectDefinitionPage from "./pages/ProjectDefinitionPage";
 import BenchmarkDefinitionPage from "./pages/BenchmarkDefinitionPage";
+import SourceRoundupPage from "./pages/SourceRoundupPage";
 
 function App() {
   return (
@@ -42,6 +43,15 @@ function App() {
         element={
           <AppLayout>
             <BenchmarkDefinitionPage  />
+          </AppLayout>
+        }
+      />
+
+      <Route
+        path="/project/:id/sources"
+        element={
+          <AppLayout>
+            <SourceRoundupPage   />
           </AppLayout>
         }
       />

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { fetchBenchmark, saveBenchmark } from "../api";
+import { fetchBenchmark, saveBenchmark, generatePrompt, findSources } from "../api";
 
 const BenchmarkForm = () => {
   const [formData, setFormData] = useState({
@@ -52,20 +52,33 @@ const BenchmarkForm = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (isFormEmpty()){
+  
+    if (isFormEmpty()) {
       alert("Please fill in at least one benchmark field before continuing.");
       return;
     }
+  
     try {
-        await saveBenchmark({
-          project_id: projectId!,
-          ...formData,
-        });
-        navigate(`/project/${projectId}/sources`); // or wherever you want next
-      } catch (err) {
-        console.error("Failed to save benchmark:", err);
-      }
+      // 1. Save benchmark data to the backend
+      await saveBenchmark({
+        project_id: projectId!,
+        ...formData,
+      });
+  
+      // 2. Generate the search prompt
+      const { prompt } = await generatePrompt(projectId!);
+  
+      // 3. Use the prompt to find sources
+      const { sources } = await findSources(prompt);
+  
+      // 4. Navigate to next page with sources (optional: pass sources via state)
+      navigate(`/project/${projectId}/sources`, { state: { sources } });
+    } catch (err) {
+      console.error("Failed during benchmark processing:", err);
+      alert("Something went wrong. Please try again.");
+    }
   };
+  
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">

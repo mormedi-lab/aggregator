@@ -82,5 +82,21 @@ export async function fetchBenchmark(projectId: string) {
   return res.json();
 }
 
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000"; // fallback for dev
+
+export async function generatePrompt(projectId: string) {
+  const res = await fetch(`${BASE_URL}/generate_prompt?project_id=${projectId}`);
+  if (!res.ok) throw new Error("Failed to generate prompt");
+  return res.json();
+}
+
+export async function findSources(prompt: string) {
+  const res = await fetch(`${BASE_URL}/find_sources?search_prompt=${encodeURIComponent(prompt)}`);
+  if (!res.ok) throw new Error("Failed to find sources");
+  return res.json();
+}
+
+
+
 
 
