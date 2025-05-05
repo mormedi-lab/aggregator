@@ -56,7 +56,10 @@ def get_project_by_id(id: str = Query(...)):
 @router.post("/projects")
 def create_project(data: ProjectCreate = Body(...)):
     with driver.session() as session:
-        session.run("""
+        new_id = str(uuid.uuid4())
+
+        session.run(
+            """
             CREATE (p:Project {
                 id: $id,
                 title: $title,
@@ -64,8 +67,15 @@ def create_project(data: ProjectCreate = Body(...)):
                 objective: $objective,
                 last_accessed: date()
             })
-        """, id=str(uuid.uuid4()), title=data.title, industry=data.industry, objective=data.objective)
-    return JSONResponse(content={"status": "success"})
+            """,
+            id=new_id,
+            title=data.title,
+            industry=data.industry,
+            objective=data.objective,
+        )
+
+        return JSONResponse(content={"status": "success", "id": new_id})
+
 
 
 @router.delete("/project")

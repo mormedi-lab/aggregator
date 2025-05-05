@@ -3,6 +3,7 @@ import AppLayout from "./layout/AppLayout";
 import LoginPage from "./pages/LoginPage";
 import ProjectsPage from "./pages/ProjectsPage";
 import ProjectDefinitionPage from "./pages/ProjectDefinitionPage";
+import BenchmarkDefinitionPage from "./pages/BenchmarkDefinitionPage";
 
 function App() {
   return (
@@ -32,6 +33,15 @@ function App() {
         element={
           <AppLayout>
             <ProjectDefinitionPage />
+          </AppLayout>
+        }
+      />
+
+      <Route
+        path="/project/:id/benchmark"
+        element={
+          <AppLayout>
+            <BenchmarkDefinitionPage  />
           </AppLayout>
         }
       />

@@ -22,7 +22,9 @@ export async function createProject(project: {
   });
 
   if (!res.ok) throw new Error("Failed to create project");
-  return res.json();
+
+  const data = await res.json();
+  return data.id; // return just the ID
 }
 
 export async function deleteProject(id: string) {
@@ -54,3 +56,31 @@ export async function updateProject(project: {
   if (!res.ok) throw new Error("Failed to update project");
   return res.json();
 }
+
+export async function saveBenchmark(data: {
+  project_id: string;
+  objective: string;
+  companies: string;
+  industries: string;
+  geographies: string;
+  timeframe: string;
+  source_type: string;
+}) {
+  const res = await fetch(`${API}/benchmark`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+
+  if (!res.ok) throw new Error("Failed to save benchmark");
+  return res.json();
+}
+
+export async function fetchBenchmark(projectId: string) {
+  const res = await fetch(`${API}/benchmark?project_id=${projectId}`);
+  if (!res.ok) throw new Error("Failed to fetch benchmark");
+  return res.json();
+}
+
+
+
