@@ -1,17 +1,25 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { generatePrompt, findSources } from "../api";
+import SourceCard from "../components/SourceCard";
+
+interface Source {
+  headline: string;
+  publisher: string;
+  url: string;
+  date_published: string;
+  summary: string;
+}
 
 const SourceRoundupPage = () => {
   const { id: projectId } = useParams();
-  const [sources, setSources] = useState<string[]>([]);
+  const [sources, setSources] = useState<Source[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
     const loadSources = async () => {
       try {
-        setLoading(true);
         const promptRes = await generatePrompt(projectId!);
         const sourcesRes = await findSources(promptRes.prompt);
         setSources(sourcesRes.sources || []);
@@ -28,7 +36,7 @@ const SourceRoundupPage = () => {
 
   return (
     <div className="p-8">
-      <h1 className="text-2xl font-semibold mb-6">Source Roundup</h1>
+      <h1 className="text-2xl font-semibold mb-6">Sources for project {projectId}</h1>
 
       {loading ? (
         <div className="text-center mt-20">
@@ -37,24 +45,10 @@ const SourceRoundupPage = () => {
         </div>
       ) : error ? (
         <div className="text-red-600">{error}</div>
-      ) : sources.length === 0 ? (
-        <div className="text-gray-600">No sources found.</div>
       ) : (
-        <div className="grid gap-4">
-          {sources.map((url, idx) => (
-            <div
-              key={idx}
-              className="border border-gray-200 p-4 rounded shadow-sm hover:shadow transition"
-            >
-              <a
-                href={url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-600 hover:underline break-all"
-              >
-                {url}
-              </a>
-            </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {sources.map((src, i) => (
+            <SourceCard key={i} source={src} />
           ))}
         </div>
       )}

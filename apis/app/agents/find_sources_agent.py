@@ -1,26 +1,57 @@
 from agents import Agent, Runner, WebSearchTool
 import os
 import re
+import json
 
+# Define the agent
 agent = Agent(
     name="FindSourcesAgent",
-        instructions=(
-        "You are an expert research assistant.\n"
-        "Your job is to return **only a list of up to 10 URLs** that match the provided search query.\n"
-        "- No summaries.\n"
-        "- No commentary.\n"
-        "- No markdown.\n"
-        "- No list formatting (e.g., no bullets, numbers, or titles).\n"
-        "- Output MUST be only raw URLs, one per line.\n\n"
-        "If no relevant URLs are found, return an empty string."
-    ),
+    instructions="""
+    You are an expert web researcher. Your task is to use the provided search query to return exactly 5–10 relevant sources in JSON format.
+
+    Each item must be a JSON object with the following keys:
+    - "headline" (string): Title of the article or report
+    - "publisher" (string): Publisher or website
+    - "summary" (string): 1–2 sentence explanation of relevance
+    - "date_published" (string): YYYY-MM-DD
+    - "url" (string): Direct link
+
+    Your entire output must be a single valid JSON array (not markdown, not text, not wrapped in ```json). Do not include any explanations, prose, or commentary.
+
+    Example:
+    [
+    {
+        "headline": "Chase UK tops customer satisfaction survey",
+        "publisher": "Financial Times",
+        "summary": "A 2024 FT report highlighting Chase UK's leading NPS score in the UK retail banking sector.",
+        "date_published": "2024-06-21",
+        "url": "https://www.ft.com/content/example"
+    },
+    ...
+    ]
+
+    Return only the JSON array. Do not add any headers, markdown formatting, bullet points, or additional text.
+    """
+    ,
     tools=[WebSearchTool()]
 )
 
-def extract_urls(text: str) -> list[str]:  # ✅ Add this
+
+# Optional utility if you ever want raw URLs
+def extract_urls(text: str) -> list[str]:
     return re.findall(r'https?://[^\s]+', text)
 
-async def find_sources_from_prompt(search_prompt: str) -> list[str]:
+# Helper to extract just the JSON portion from a possibly messy response
+def clean_json_output(output: str) -> str:
+    match = re.search(r'\[\s*{.*?}\s*\]', output, re.DOTALL)
+    return match.group(0) if match else output
+
+async def find_sources_from_prompt(search_prompt: str) -> list[dict]:
     result = await Runner.run(agent, search_prompt)
-    print(result.final_output)  # 👈 For debugging
-    return extract_urls(result.final_output)
+    raw_output = result.final_output
+
+    try:
+        return json.loads(raw_output)
+    except json.JSONDecodeError:
+        print("❌ Failed to parse source results as JSON.\nRAW OUTPUT:\n", raw_output)
+        return []
