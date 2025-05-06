@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { fetchBenchmark, saveBenchmark, generatePrompt, findSources } from "../api";
+import { fetchBenchmark, saveBenchmark } from "../api";
 
 const BenchmarkForm = () => {
   const [formData, setFormData] = useState({

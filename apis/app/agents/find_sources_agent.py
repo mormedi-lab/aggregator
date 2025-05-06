@@ -36,16 +36,6 @@ agent = Agent(
     tools=[WebSearchTool()]
 )
 
-
-# Optional utility if you ever want raw URLs
-def extract_urls(text: str) -> list[str]:
-    return re.findall(r'https?://[^\s]+', text)
-
-# Helper to extract just the JSON portion from a possibly messy response
-def clean_json_output(output: str) -> str:
-    match = re.search(r'\[\s*{.*?}\s*\]', output, re.DOTALL)
-    return match.group(0) if match else output
-
 async def find_sources_from_prompt(search_prompt: str) -> list[dict]:
     result = await Runner.run(agent, search_prompt)
     raw_output = result.final_output

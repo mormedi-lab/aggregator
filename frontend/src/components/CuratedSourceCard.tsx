@@ -1,4 +1,3 @@
-// components/SourceCard.tsx
 import React, { useState } from "react";
 
 interface Source {
@@ -7,15 +6,16 @@ interface Source {
   url: string;
   date_published: string;
   summary: string;
+  isCurated?: boolean;
 }
 
-const SourceCard: React.FC<{ source: Source }> = ({ source }) => {
+const CuratedSourceCard: React.FC<{ source: Source; onRemove: () => void }> = ({ source, onRemove }) => {
   const [added, setAdded] = useState(false);
 
   return (
-    <div className="border border-gray-200 rounded-lg p-4 shadow-sm relative">
+    <div className="border border-gray-200 rounded-lg p-4 shadow-sm relative bg-[#F3E2D1]">
       <button
-        onClick={() => console.log("Close clicked")}
+        onClick={onRemove}
         className="absolute top-2 right-3 text-gray-400 hover:text-red-500"
       >
         ✕
@@ -29,22 +29,25 @@ const SourceCard: React.FC<{ source: Source }> = ({ source }) => {
       </div>
 
       <div className="text-sm text-gray-600 mb-3">
-        {source.summary || "Summary will appear here soon."}
+        {source.summary || "Manually curated source."}
       </div>
 
       <div className="text-xs text-gray-400 mb-2">{source.date_published}</div>
-
-      <button
-        onClick={() => setAdded(true)}
-        disabled={added}
-        className={`px-4 py-1 text-sm rounded ${
-          added ? "bg-gray-200 text-gray-500" : "bg-[#F84C39] text-white"
-        }`}
-      >
-        {added ? "Added" : "Add to My Library"}
-      </button>
+      
+      <div className="flex justify-between items-center">
+        <button
+          onClick={() => setAdded(true)}
+          disabled={added}
+          className={`px-4 py-1 text-sm rounded ${
+            added ? "bg-gray-200 text-gray-500" : "bg-[#F84C39] text-white"
+          }`}
+        >
+          {added ? "Added" : "Add to My Library"}
+        </button>
+        
+      </div>
     </div>
   );
 };
 
-export default SourceCard;
+export default CuratedSourceCard;
