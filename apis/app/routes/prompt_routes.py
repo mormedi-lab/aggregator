@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 from app.config import neo4j_client
-from app.agents.prompt_generator_agent import generate_prompt  # ✅ import the async fn
+from app.agents.prompt_generator_agent import generate_prompt 
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -32,7 +32,7 @@ def get_prompt_context(project_id: str):
 
 
 @router.get("/generate_prompt")
-async def generate_prompt_route(project_id: str):  # ✅ async route
+async def generate_prompt_route(project_id: str): 
     with driver.session() as session:
         result = session.run("""
             MATCH (p:Project {id: $project_id})
@@ -50,5 +50,5 @@ async def generate_prompt_route(project_id: str):  # ✅ async route
             return JSONResponse(content={"error": "Project not found"}, status_code=404)
 
         form_answers = {k: record[k] or "" for k in record.keys()}  # fill None with ""
-        prompt = await generate_prompt(form_answers)  # ✅ use new agent structure
+        prompt = await generate_prompt(form_answers)  
         return {"prompt": prompt}

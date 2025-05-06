@@ -43,5 +43,5 @@ async def find_sources_from_prompt(search_prompt: str) -> list[dict]:
     try:
         return json.loads(raw_output)
     except json.JSONDecodeError:
-        print("❌ Failed to parse source results as JSON.\nRAW OUTPUT:\n", raw_output)
+        print("Failed to parse source results as JSON.\nRAW OUTPUT:\n", raw_output)
         return []
