@@ -32,14 +32,15 @@ function ProjectDefinitionPage() {
     try {
       if (projectId) {
         await updateProject({ id: projectId, title, industry, objective });
+        navigate(`/project/${projectId}/benchmark`);
       } else {
-        await createProject({ title, industry, objective });
+        const newId = await createProject({ title, industry, objective });
+        navigate(`/project/${newId}/benchmark`);
       }
-      navigate("/projects");
     } catch (err) {
       console.error("Error saving project:", err);
     }
-  };
+  };  
 
   return (
     <div className="min-h-screen bg-[#F9F9F9] px-8 py-2">
