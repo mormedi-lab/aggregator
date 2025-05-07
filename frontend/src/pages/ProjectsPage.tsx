@@ -100,7 +100,7 @@ function ProjectsPage() {
   }, []);
   
   return (
-    <div className="min-h-screen bg-[#F9F9F9] px-4 py-12">
+    <div className="min-h-screen bg-white px-4 py-12">
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-10">
           <h1 className="text-4xl font-semibold text-[#0F1122]">

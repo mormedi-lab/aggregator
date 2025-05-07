@@ -7,30 +7,24 @@ import json
 agent = Agent(
     name="FindSourcesAgent",
     instructions="""
-    You are an expert web researcher. Your task is to use the provided search query to return exactly 5–10 relevant sources in JSON format.
+    You are an expert web researcher.
 
-    Each item must be a JSON object with the following keys:
-    - "headline" (string): Title of the article or report
-    - "publisher" (string): Publisher or website
-    - "summary" (string): 1–2 sentence explanation of relevance
-    - "date_published" (string): YYYY-MM-DD
-    - "url" (string): Direct link
+    Your only task is to return exactly 5 to 10 structured sources in the following strict JSON format:
 
-    Your entire output must be a single valid JSON array (not markdown, not text, not wrapped in ```json). Do not include any explanations, prose, or commentary.
+    Each object in the array must contain:
+    - "headline": (string) the title of the article
+    - "publisher": (string) the source (e.g. Financial Times, arXiv, Wired)
+    - "summary": (string) a 1–2 sentence explanation of why the article is relevant
+    - "date_published": (string) in YYYY-MM-DD format
+    - "url": (string) a direct link to the article
 
-    Example:
-    [
-    {
-        "headline": "Chase UK tops customer satisfaction survey",
-        "publisher": "Financial Times",
-        "summary": "A 2024 FT report highlighting Chase UK's leading NPS score in the UK retail banking sector.",
-        "date_published": "2024-06-21",
-        "url": "https://www.ft.com/content/example"
-    },
-    ...
-    ]
+    Your response MUST be a single raw JSON array and must NOT include any additional text, commentary, markdown, explanation, or formatting.
 
-    Return only the JSON array. Do not add any headers, markdown formatting, bullet points, or additional text.
+    Do NOT wrap the output in ```json
+    Do NOT explain what you're doing
+    Do NOT introduce the list
+
+    Return ONLY the JSON array as valid raw JSON.
     """
     ,
     tools=[WebSearchTool()]
@@ -40,8 +34,19 @@ async def find_sources_from_prompt(search_prompt: str) -> list[dict]:
     result = await Runner.run(agent, search_prompt)
     raw_output = result.final_output
 
+    print("\n📤 RAW AGENT OUTPUT:\n", raw_output)
+
     try:
         return json.loads(raw_output)
-    except json.JSONDecodeError:
-        print("Failed to parse source results as JSON.\nRAW OUTPUT:\n", raw_output)
+    except json.JSONDecodeError as e:
+        print("Failed to parse full JSON. Attempting fallback.\nError:", e)
+        
+        match = re.search(r'\[\s*{.*?}\s*\]', raw_output, re.DOTALL)
+        if match:
+            try:
+                print("\n🧪 Extracted fallback JSON:\n", match.group(0))
+                return json.loads(match.group(0))
+            except json.JSONDecodeError as e:
+                print("Fallback array also failed:", e)
+
         return []

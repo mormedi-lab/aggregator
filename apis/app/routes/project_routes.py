@@ -83,7 +83,8 @@ def delete_project(id: str = Query(...)):
     with driver.session() as session:
         session.run("""
             MATCH (p:Project {id: $id})
-            DETACH DELETE p
+            OPTIONAL MATCH (p)-[:HAS_SOURCE]->(s:Source)
+            DETACH DELETE p, s
         """, id=id)
     return JSONResponse(content={"status": "deleted"})
 

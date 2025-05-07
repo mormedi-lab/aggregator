@@ -7,6 +7,7 @@ from app.routes.project_routes import router as project_router
 from app.routes.benchmark_routes import router as benchmark_router
 from app.routes.prompt_routes import router as prompt_router
 from app.routes.source_routes import router as source_router
+from app.routes.metadata_routes import router as metadata_router
 
 app = FastAPI()
 
@@ -22,5 +23,4 @@ app.include_router(project_router)
 app.include_router(benchmark_router)
 app.include_router(prompt_router)
 app.include_router(source_router)
-
-
+app.include_router(metadata_router) 

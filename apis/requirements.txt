@@ -3,4 +3,6 @@ uvicorn
 neo4j
 python-dotenv
 pytest
+openai
 openai-agents
+beautifulsoup4
