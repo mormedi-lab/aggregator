@@ -8,10 +8,6 @@ from app.routes.benchmark_routes import router as benchmark_router
 from app.routes.prompt_routes import router as prompt_router
 from app.routes.source_routes import router as source_router
 
-# Load from absolute path using pathlib
-env_path = Path(__file__).parent.parent / "conf" / ".env"
-load_dotenv(dotenv_path=env_path)
-
 app = FastAPI()
 
 app.add_middleware(
