@@ -1,65 +1,95 @@
 steps:
+  # [START set-tf-config]
+  - id: 'set tf config'
+    name: 'alpine'
+    entrypoint: 'sh'
+    args: [ 'set_tf_config.sh' ]
+    env:
+      - 'PROJECT_ID=${PROJECT_ID}'
+      - 'REGION=${LOCATION}'
+      - 'BRANCH_NAME=${BRANCH_NAME}'
+      - 'CLOUD_RUN_IMAGE_NAME=${_CLOUD_RUN_IMAGE_NAME}'
+  # [END set-tf-config]
+
+  # [START tf-init]
+  - id: 'tf init'
+    name: 'hashicorp/terraform:1.11.4'
+    args: ['init']
+  # [END tf-init]
+
+  # [START tf-plan]
+  - id: 'tf plan'
+    name: 'hashicorp/terraform:1.11.4'
+    args: ['plan']
+  # [END tf-plan]
+
+  # [START docker-build]
+  # Uses the standard Docker builder provided by Google Cloud Build
+  - id: 'docker build'
+    name: 'gcr.io/cloud-builders/docker'
+    args: [ 'build', '-t', '${_CLOUD_RUN_IMAGE_NAME}', 'apis/' ]
+  # [END docker-build]
+
+  # [START docker-push]
+  # Push the built image to Google Container Registry (GCR)
+  - id: 'docker push'
+    name: 'gcr.io/cloud-builders/docker'
+    args: [ 'push', '${_CLOUD_RUN_IMAGE_NAME}' ]
+  # [END docker-push]
+
+  # [START tf-apply]
+  - id: 'tf apply'
+    name: 'hashicorp/terraform:1.11.4'
+    args: ['apply', '-auto-approve']
+  # [END tf-apply]
+
   ############ Frontend ############
-  # Step Front.1: Install the frontend dependencies
-  - name: 'node:${_NODE_VERSION}'
+  # [START node install]
+  # Install the frontend dependencies
+  - id: 'node install'
+    name: 'node:${_NODE_VERSION}'
     entrypoint: 'npm'
     dir: 'frontend'
-    args: ['install']
+    args: [ 'install' ]
+  # [END node install]
 
-  # Step Front.2: Build the frontend
-  - name: 'node:${_NODE_VERSION}'
+  # [START node build]
+  # Build the frontend
+  - id: 'node build'
+    name: 'node:${_NODE_VERSION}'
     entrypoint: 'npm'
     dir: 'frontend'
     args: [ 'run', 'build' ]
+  # [END node build]
 
-  # Step Front.3: Deploy to Firebase Hosting
-  - name: gcr.io/$PROJECT_ID/firebase
+  # [START firebase deploy]
+  # Deploy to Firebase Hosting
+  - id: 'firebase deploy'
+    name: gcr.io/$PROJECT_ID/firebase
     args: [ 'deploy', '--project=$PROJECT_ID', '--only=hosting' ]
+#    entrypoint: 'sh'
+#    args:
+#      - '-c'
+#      - |
+#        if [ $(cat sanitized_branch_name.txt) = "prod" ]; then
+#          firebase deploy \
+#            --project=${PROJECT_ID} \
+#            --only=hosting \
+#            --message="Deploying branch ${BRANCH_NAME} commit ${COMMIT_SHA} to Firebase Hosting"
+#        else
+#          firebase hosting:channel:deploy tmp-channel \
+#            --project=${PROJECT_ID}
+#        fi
+  # [END firebase deploy]
 
-  ############ APIS ############
-  # Step Apis.1: Build the Docker image
-  # Uses the standard Docker builder provided by Google Cloud Build
-  # Tags the image with the unique commit SHA for easy tracking
-  - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', 'gcr.io/$PROJECT_ID/apis:$COMMIT_SHA', 'apis/']
-
-  # Step Apis.2: Push the built image to Google Container Registry (GCR)
-  # GCR is Google's private Docker image storage
-  - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'gcr.io/$PROJECT_ID/apis:$COMMIT_SHA']
-
-  # Step Apis.3: Deploy the image to Cloud Run
-  # Uses the gcloud command-line tool (also provided as a builder)
-  # Deploys a service named "apis" using the image we just pushed
-  # Sets an environment variable (e.g., ENV=LIVE)
-  # Specifies the region and project
-  - name: 'gcr.io/cloud-builders/gcloud'
-    args:
-      - 'run'
-      - 'deploy'
-      - 'apis' # This should be your service name
-      - '--image=gcr.io/$PROJECT_ID/apis:$COMMIT_SHA' # Use the image we built/pushed
-      - '--set-env-vars=ENV=LIVE' # Example environment variable
-      - '--region=europe-southwest1' # TODO: move region to env
-      - '--project=$PROJECT_ID'
-      # Add other flags as needed: --memory, --cpu, --allow-unauthenticated, etc.
-
-  # Step Apis.4: Make sure 100% of traffic goes to the new version
-  # This ensures the update is live immediately
-  - name: 'gcr.io/cloud-builders/gcloud'
-    args:
-      - 'run'
-      - 'services'
-      - 'update-traffic'
-      - 'apis' # Your service name again
-      - '--to-latest'
-      - '--region=europe-southwest1' # Same region as deployment
-      - '--project=$PROJECT_ID'
-
+# Substitutions variables
 substitutions:
-    _NODE_VERSION: '22'
+  _NODE_VERSION: '22'
+  # Tags the image with the unique commit SHA for easy tracking
+  _CLOUD_RUN_IMAGE_NAME: 'gcr.io/${PROJECT_ID}/apis:${COMMIT_SHA}'
 
 # Configure Cloud Build options
 options:
   # Send build logs straight to Cloud Logging
   logging: CLOUD_LOGGING_ONLY
+  dynamicSubstitutions: true
