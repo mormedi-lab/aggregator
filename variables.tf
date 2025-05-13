@@ -3,8 +3,8 @@ variable "project_id" {
   type        = string
 }
 
-variable "region" {
-  description = "The region to deploy to"
+variable "location" {
+  description = "The region location used to deploy the resources"
   type        = string
 }
 
@@ -13,7 +13,7 @@ variable "branch_name" {
   type        = string
 }
 
-variable "cloud_run_image_name" {
+variable "apis_image_name" {
   description = "The name of the image to deploy to Cloud Run"
   type        = string
 }

@@ -4,11 +4,15 @@
 # Usage: PROJECT_ID="mormedi-aggregator-456814" REGION="europe-west1"  BRANCH_NAME="feature/My_Branch" CLOUD_RUN_IMAGE_NAME="gcr.io/mormedi-aggregator-456814/apis:21633de1a71039100926705408d95ba7d0ce56ef" ./set_tf_config.sh
 
 # Paths of the files to be written
+SANITIZED_BRANCH_NAME_FILE="sanitized_branch_name.txt"
+APIS_IMAGE_NAME_FILE="apis_image_name.txt"
 BACKEND_TF_FILE="./backend.tf"
 TFVARS_FILE="./terraform.tfvars"
 
 # Sanitize the branch name to be used in the configuration
 SANITIZED_BRANCH_NAME=$(echo "$BRANCH_NAME" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9-]/-/g')
+# Name of the cloud run image. Tags the image with the unique commit SHA for easy tracking
+APIS_IMAGE_NAME="${LOCATION}-docker.pkg.dev/${PROJECT_ID}/docker-repo/${SANITIZED_BRANCH_NAME}/apis:${COMMIT_SHA}"
 
 write_backend () {
   # This function writes the backend configuration to the backend.tf file.
@@ -33,12 +37,20 @@ read_file () {
   echo "***************************************"
 }
 
+# Write the sanitized branch name to a file
+echo -n "${SANITIZED_BRANCH_NAME}" > $SANITIZED_BRANCH_NAME_FILE
+read_file $SANITIZED_BRANCH_NAME_FILE
+
+# Write the apis image name to a file
+echo -n "${APIS_IMAGE_NAME}" > $APIS_IMAGE_NAME_FILE
+read_file $APIS_IMAGE_NAME_FILE
+
 # Write the Terraform variables to the terraform.tfvars file
 echo "# Terraform variables" > $TFVARS_FILE
 write_var "project_id" "$PROJECT_ID"
-write_var "region" "$REGION"
+write_var "location" "$LOCATION"
 write_var "branch_name" "$SANITIZED_BRANCH_NAME"
-write_var "cloud_run_image_name" "$CLOUD_RUN_IMAGE_NAME"
+write_var "apis_image_name" "$APIS_IMAGE_NAME"
 read_file $TFVARS_FILE
 
 # Write the backend configuration to the backend.tf file
