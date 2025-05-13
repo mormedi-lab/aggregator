@@ -4,11 +4,13 @@
 # Usage: PROJECT_ID="mormedi-aggregator-456814" REGION="europe-west1"  BRANCH_NAME="feature/My_Branch" CLOUD_RUN_IMAGE_NAME="gcr.io/mormedi-aggregator-456814/apis:21633de1a71039100926705408d95ba7d0ce56ef" ./set_tf_config.sh
 
 # Paths of the files to be written
+SANITIZED_BRANCH_NAME_FILE="sanitized_branch_name.txt"
 BACKEND_TF_FILE="./backend.tf"
 TFVARS_FILE="./terraform.tfvars"
 
 # Sanitize the branch name to be used in the configuration
 SANITIZED_BRANCH_NAME=$(echo "$BRANCH_NAME" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9-]/-/g')
+
 
 write_backend () {
   # This function writes the backend configuration to the backend.tf file.
@@ -32,6 +34,10 @@ read_file () {
   cat $1
   echo "***************************************"
 }
+
+# Write the sanitized branch name to a file
+echo -n "${SANITIZED_BRANCH_NAME}" > $SANITIZED_BRANCH_NAME_FILE
+read_file $SANITIZED_BRANCH_NAME_FILE
 
 # Write the Terraform variables to the terraform.tfvars file
 echo "# Terraform variables" > $TFVARS_FILE

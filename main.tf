@@ -38,9 +38,6 @@ module "cloud_run" {
 }
 
 # TODO: Change services account
-# TODO: clean storage
 # TODO: Save the image in the registry of the same region europe-west1
-# TODO: Firebase deployment for the test branch $ firebase hosting:channel:deploy CHANNEL_ID
-# TODO: For the test branch propagate the cloud url to the frontend
 # TODO: Add tags to cloud run
 # TODO: Move the cloud run in the apis folder into a main.tf file

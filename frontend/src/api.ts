@@ -1,6 +1,8 @@
 //frontend api client for calling backend endpoints using fetch()
 
-const API = import.meta.env.VITE_API_URL;
+const API = import.meta.env.VITE_API_URL || "http://localhost:8000"; // fallback for dev
+
+console.log("API URL:", API);
 
 export async function fetchProjects() {
   const res = await fetch(`${API}/projects`);
@@ -28,7 +30,7 @@ export async function createProject(project: {
 }
 
 export async function deleteProject(id: string) {
-  const res = await fetch(`http://localhost:8000/project?id=${id}`, {
+  const res = await fetch(`${API}/project?id=${id}`, {
     method: "DELETE",
   });
   if (!res.ok) throw new Error("Failed to delete project");
@@ -36,7 +38,7 @@ export async function deleteProject(id: string) {
 }
 
 export async function fetchProjectById(id: string) {
-  const res = await fetch(`http://localhost:8000/project?id=${id}`);
+  const res = await fetch(`${API}/project?id=${id}`);
   if (!res.ok) throw new Error("Failed to fetch project");
   return res.json();
 }
@@ -48,7 +50,7 @@ export async function updateProject(project: {
   industry: string;
   objective: string;
 }) {
-  const res = await fetch("http://localhost:8000/project", {
+  const res = await fetch("${API}/project", {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(project),
@@ -82,16 +84,15 @@ export async function fetchBenchmark(projectId: string) {
   return res.json();
 }
 
-const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000"; // fallback for dev
 
 export async function generatePrompt(projectId: string) {
-  const res = await fetch(`${BASE_URL}/generate_prompt?project_id=${projectId}`);
+  const res = await fetch(`${API}/generate_prompt?project_id=${projectId}`);
   if (!res.ok) throw new Error("Failed to generate prompt");
   return res.json();
 }
 
 export async function findSources(prompt: string) {
-  const res = await fetch(`${BASE_URL}/find_sources?search_prompt=${encodeURIComponent(prompt)}`);
+  const res = await fetch(`${API}/find_sources?search_prompt=${encodeURIComponent(prompt)}`);
   if (!res.ok) throw new Error("Failed to find sources");
   return res.json();
 }
