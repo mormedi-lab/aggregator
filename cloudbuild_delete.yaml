@@ -1,0 +1,41 @@
+steps:
+  # [START set-tf-config]
+  - id: 'set tf config'
+    name: 'alpine'
+    entrypoint: 'sh'
+    args: [ 'set_tf_config.sh' ]
+    env:
+      - 'PROJECT_ID=${PROJECT_ID}'
+      - 'REGION=${LOCATION}'
+      - 'BRANCH_NAME=${BRANCH_NAME}'
+      - 'CLOUD_RUN_IMAGE_NAME=${_CLOUD_RUN_IMAGE_NAME}'
+  # [END set-tf-config]
+
+  # [START tf-init]
+  - id: 'tf init'
+    name: '${_TERRAFORM_IMAGE}'
+    args: ['init']
+  # [END tf-init]
+
+  # [START tf-destroy]
+  - id: 'tf destroy'
+    name: '${_TERRAFORM_IMAGE}'
+    args: ['destroy', '-auto-approve']
+  # [END tf-destroy]
+
+# TODO: Add remove images in Artifact
+# TODO: remove TF file from GCS
+
+# Substitutions variables
+substitutions:
+  _TERRAFORM_IMAGE: 'hashicorp/terraform:1.11.4'
+  _DOCKER_IMAGE: 'gcr.io/cloud-builders/docker'
+  _NODE_IMAGE: 'node:22'
+  # Tags the image with the unique commit SHA for easy tracking
+  _CLOUD_RUN_IMAGE_NAME: 'gcr.io/${PROJECT_ID}/apis:${COMMIT_SHA}'
+
+# Configure Cloud Build options
+options:
+  # Send build logs straight to Cloud Logging
+  logging: CLOUD_LOGGING_ONLY
+  dynamicSubstitutions: true
