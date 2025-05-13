@@ -1,0 +1,66 @@
+steps:
+  # [START set-tf-config]
+  - id: 'set tf config'
+    name: 'alpine'
+    entrypoint: 'sh'
+    args: [ 'set_tf_config.sh' ]
+    env:
+      - 'PROJECT_ID=${PROJECT_ID}'
+      - 'LOCATION=${LOCATION}'
+      - 'BRANCH_NAME=${BRANCH_NAME}'
+      - 'COMMIT_SHA=${COMMIT_SHA}'
+  # [END set-tf-config]
+
+  # [START tf init]
+  - id: 'tf init'
+    name: '${_TERRAFORM_IMAGE}'
+    args: ['init']
+  # [END tf init]
+
+  # [START tf destroy]
+  - id: 'tf destroy'
+    name: '${_TERRAFORM_IMAGE}'
+    args: ['destroy', '-auto-approve']
+  # [END tf destroy]
+
+  # [START clean tfstate]
+  - id: 'clean tfstate'
+    name: 'gcr.io/cloud-builders/gcloud'
+    allow_failure: true
+    script: |
+      #!/bin/bash
+      gcloud storage rm gs://${PROJECT_ID}-tfstate/env/$(cat sanitized_branch_name.txt)/*
+    env:
+      - 'PROJECT_ID=${PROJECT_ID}'
+      - 'LOCATION=${LOCATION}'
+  # [END clean tfstate]
+
+  # [START artifacts delete images]
+  - id: 'artifacts delete images'
+    name: 'gcr.io/cloud-builders/gcloud'
+    allow_failure: true
+    script: |
+      #!/bin/bash
+      gcloud artifacts docker images delete \
+      "${LOCATION}-docker.pkg.dev/${PROJECT_ID}/docker-repo/$(cat sanitized_branch_name.txt)/apis" \
+      --quiet
+    env:
+      - 'PROJECT_ID=${PROJECT_ID}'
+      - 'LOCATION=${LOCATION}'
+  # [END artifacts delete images]
+
+# TODO: remove TF file from GCS
+
+# Substitutions variables
+substitutions:
+  _TERRAFORM_IMAGE: 'hashicorp/terraform:1.11.4'
+  _DOCKER_IMAGE: 'gcr.io/cloud-builders/docker'
+  _NODE_IMAGE: 'node:22'
+  # Tags the image with the unique commit SHA for easy tracking
+  _CLOUD_RUN_IMAGE_NAME: 'gcr.io/${PROJECT_ID}/apis:${COMMIT_SHA}'
+
+# Configure Cloud Build options
+options:
+  # Send build logs straight to Cloud Logging
+  logging: CLOUD_LOGGING_ONLY
+  dynamicSubstitutions: true
