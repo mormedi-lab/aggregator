@@ -1,3 +1,13 @@
+variable "env" {
+  description = "The environment to deploy to could be dev or prod"
+  type        = string
+
+  validation {
+    condition = contains(["prod", "dev"], var.env)
+    error_message = "Valid values for var: env are (prod, dev)."
+  }
+}
+
 variable "project_id" {
   description = "The project ID to deploy to"
   type        = string

@@ -86,7 +86,7 @@ steps:
     args:
       - '-c'
       - |
-        if [ ${BRANCH_NAME} = "prod" ]; then
+        if [ "${BRANCH_NAME}" = "prod" ]; then
           firebase deploy \
             --project=${PROJECT_ID} \
             --only=hosting \
