@@ -4,7 +4,7 @@ locals {
 
 provider "google" {
   project = var.project_id
-  region  = var.region
+  region  = var.location
 }
 
 module "cloud_run" {
@@ -14,11 +14,11 @@ module "cloud_run" {
   # Required variables
   service_name = "${var.branch_name}-apis"
   project_id   = var.project_id
-  location     = var.region
-  image        = var.cloud_run_image_name
+  location     = var.location
+  image        = var.apis_image_name
   members = ["allUsers"]
   # Secret file with the path /apis/conf/.env
-  volumes      = [
+  volumes = [
     {
       name = "secret_env",
       secret = [
@@ -38,9 +38,6 @@ module "cloud_run" {
 }
 
 # TODO: Change services account
-# TODO: clean storage
 # TODO: Save the image in the registry of the same region europe-west1
-# TODO: Firebase deployment for the test branch $ firebase hosting:channel:deploy CHANNEL_ID
-# TODO: For the test branch propagate the cloud url to the frontend
 # TODO: Add tags to cloud run
 # TODO: Move the cloud run in the apis folder into a main.tf file

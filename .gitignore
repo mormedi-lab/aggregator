@@ -51,13 +51,19 @@ build/Release
 lib-cov
 
 # ========== Env files ==========
-.env
-frontend/.env
-apis/conf/.env
-apis/conf/.env.prod
-apis/tools/create_secrets.py
-
+*.env
+*.env.prod
 
 # ========== Misc ==========
 .node_repl_history
 .eslintcache
+
+# ========== Terraform ==========
+.terraform*
+*.tfstate*
+*.tfplan
+# Cloud build files, they are setup by set_tf_config.sh in the CI.
+backend.tf
+terraform.tfvars
+sanitized_branch_name.txt
+apis_image_name.txt
