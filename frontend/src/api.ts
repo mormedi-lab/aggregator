@@ -94,6 +94,8 @@ export async function generatePrompt(projectId: string) {
 export async function findSources(prompt: string) {
   const res = await fetch(`${API}/find_sources?search_prompt=${encodeURIComponent(prompt)}`);
   if (!res.ok) throw new Error("Failed to find sources");
+}
+
 export async function postAndSaveSources(projectId: string, prompt: string) {
   const res = await fetch(`${API}/find_sources`, {
     method: "POST",
