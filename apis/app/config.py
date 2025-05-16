@@ -29,7 +29,7 @@ def neo4j_client() -> Driver:
     """
     # Neo4j config
     uri = load_conf("NEO4J_URI")
-    user = load_conf("NEO4J_USER")
+    user = load_conf("NEO4J_USERNAME")
     password = load_conf("NEO4J_PASSWORD")
 
     # TODO: replace by logging

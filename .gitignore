@@ -53,6 +53,7 @@ lib-cov
 # ========== Env files ==========
 *.env
 *.env.prod
+*.env.dev
 
 # ========== Misc ==========
 .node_repl_history

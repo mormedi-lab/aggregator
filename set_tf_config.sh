@@ -9,6 +9,12 @@ APIS_IMAGE_NAME_FILE="apis_image_name.txt"
 BACKEND_TF_FILE="./backend.tf"
 TFVARS_FILE="./terraform.tfvars"
 
+# Define the env var. By default, it is set to "dev" and it is set to "prod" only for the prod branch.
+PROJECT_ENV="dev"
+if [ "${BRANCH_NAME}" = "prod" ]; then
+  PROJECT_ENV="prod"
+fi
+
 # Sanitize the branch name to be used in the configuration
 SANITIZED_BRANCH_NAME=$(echo "$BRANCH_NAME" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9-]/-/g')
 # Name of the cloud run image. Tags the image with the unique commit SHA for easy tracking
@@ -47,6 +53,7 @@ read_file $APIS_IMAGE_NAME_FILE
 
 # Write the Terraform variables to the terraform.tfvars file
 echo "# Terraform variables" > $TFVARS_FILE
+write_var "env" "$PROJECT_ENV"
 write_var "project_id" "$PROJECT_ID"
 write_var "location" "$LOCATION"
 write_var "branch_name" "$SANITIZED_BRANCH_NAME"

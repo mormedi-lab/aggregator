@@ -1,7 +1,3 @@
-locals {
-  secret_name = "prod_env"
-}
-
 provider "google" {
   project = var.project_id
   region  = var.location
@@ -23,7 +19,7 @@ module "cloud_run" {
       name = "secret_env",
       secret = [
         {
-          secret_name = local.secret_name,
+          secret_name = "${var.env}_apis_env",
           items = { key = "latest", "path" = ".env" }
         }
       ]
