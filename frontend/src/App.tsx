@@ -5,6 +5,8 @@ import ProjectsPage from "./pages/ProjectsPage";
 import ProjectDefinitionPage from "./pages/ProjectDefinitionPage";
 import BenchmarkDefinitionPage from "./pages/BenchmarkDefinitionPage";
 import SourceRoundupPage from "./pages/SourceRoundupPage";
+import LibraryPage from "./pages/LibraryPage";
+import AppLayoutWithTopNav from "./layout/AppLayoutWithTopNav";
 
 function App() {
   return (
@@ -50,11 +52,20 @@ function App() {
       <Route
         path="/project/:id/sources"
         element={
-          <AppLayout>
+          <AppLayoutWithTopNav>
             <SourceRoundupPage   />
-          </AppLayout>
+          </AppLayoutWithTopNav>
         }
       />
+
+    <Route
+      path="/project/:id/library"
+      element={
+        <AppLayoutWithTopNav>
+          <LibraryPage />
+        </AppLayoutWithTopNav>
+      }
+    />
 
       {/* Fallback redirect */}
       <Route path="*" element={<Navigate to="/projects" replace />} />
