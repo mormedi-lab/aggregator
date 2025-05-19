@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams, useLocation } from "react-router-dom";
 import { generatePrompt, postAndSaveSources, fetchProjectById, getSavedSources, getProjectLibrary, fetchMetadataFromUrl } from "../api";
 import { API } from "../api";
@@ -33,6 +33,12 @@ const SourceRoundupPage = () => {
   const [projectTitle, setProjectTitle] = useState("");
   const [isAddUrlModalOpen, setIsAddUrlModalOpen] = useState(false);
   const [isQuerying, setIsQuerying] = useState(false);
+
+  //scroll to bottom of page when new sources are generated via text prompt
+  const bottomRef = useRef<HTMLDivElement>(null);
+  const scrollToBottom = () => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
   
   useEffect(() => {
     const loadData = async () => {
@@ -257,6 +263,7 @@ const SourceRoundupPage = () => {
                   </div>
                 )}
               </div>
+              <div ref={bottomRef} />
             </>
           )}
         </div>
