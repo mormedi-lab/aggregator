@@ -10,7 +10,7 @@ const TopNav = () => {
       : "text-gray-500 hover:text-[#F84C39]";
 
   return (
-    <div className="sticky top-0 z-50 bg-[#EDEDED]">
+    <div className="sticky top-0 z-50 bg-gray-100">
       <div className="flex space-x-8 px-6 py-3 text-sm">
         <Link to={`/project/${projectId}/sources`} className={`${isActive("sources")} pb-1`}>
           Curation
