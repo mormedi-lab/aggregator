@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams, useLocation } from "react-router-dom";
 import { generatePrompt, postAndSaveSources, fetchProjectById, getSavedSources, getProjectLibrary, fetchMetadataFromUrl } from "../api";
 import { API } from "../api";
 import SourceCard from "../components/SourceCard";
 import CuratedSourceCard from "../components/CuratedSourceCard";
-import AddUrlModal from "../components/AddUrlModal"
+import AddUrlModal from "../components/AddUrlModal";
+import PromptSearchBar from "../components/PromptSearchBar";
 
 interface LocationState {
   loading?: boolean;
@@ -31,7 +32,13 @@ const SourceRoundupPage = () => {
   const [error, setError] = useState("");
   const [projectTitle, setProjectTitle] = useState("");
   const [isAddUrlModalOpen, setIsAddUrlModalOpen] = useState(false);
+  const [isQuerying, setIsQuerying] = useState(false);
 
+  //scroll to bottom of page when new sources are generated via text prompt
+  const bottomRef = useRef<HTMLDivElement>(null);
+  const scrollToBottom = () => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
   
   useEffect(() => {
     const loadData = async () => {
@@ -157,11 +164,48 @@ const SourceRoundupPage = () => {
     }
   };  
 
+  //query new source cards from within the curation page
+  const handleQuerySearch = async (query: string) => {
+    setIsQuerying(true);
+    try {
+      const response = await fetch(`${API}/find_sources`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          project_id: projectId,
+          search_prompt: query,
+        }),
+      });
+  
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || "Failed to fetch sources");
+  
+      const formattedNewSources = data.sources.map((src: any) => ({
+        id: crypto.randomUUID(), // fallback in case the backend doesn’t provide ID
+        headline: src.headline,
+        publisher: new URL(src.url).hostname.replace("www.", ""),
+        url: src.url,
+        date_published: src.date_published || "",
+        summary: src.summary || "Summary coming soon...",
+        isInLibrary: false,
+        is_curated: false,
+      }));
+  
+      // Append to the current list
+      setSources(prev => [...prev, ...formattedNewSources]);
+    } catch (error) {
+      console.error("Error fetching sources:", error);
+    } finally {
+      setIsQuerying(false);
+      scrollToBottom();
+    }
+  };
+
   return (
     <>
       <div className="min-h-screen bg-white px-4 py-8">
         <div className="max-w-7xl mx-auto">
-          <div className="flex justify-between items-center mb-10">
+          <div className="flex justify-between items-center mb-4">
             <h1 className="text-4xl font-semibold text-[#0F1122]">
               {projectTitle ? (
               <>
@@ -192,6 +236,7 @@ const SourceRoundupPage = () => {
             </div>
           ) : (
             <>
+              <PromptSearchBar onSearch={handleQuerySearch} isLoading={isQuerying} />
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {sources.length > 0 ? (
                   <>
@@ -216,6 +261,7 @@ const SourceRoundupPage = () => {
                   </div>
                 )}
               </div>
+              <div ref={bottomRef} />
             </>
           )}
         </div>

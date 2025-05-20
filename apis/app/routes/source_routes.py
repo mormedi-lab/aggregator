@@ -1,12 +1,12 @@
 # app/routes/source_routes.py
-from fastapi import APIRouter, status
-from fastapi.responses import JSONResponse
-from typing import List
-from dotenv import load_dotenv
 import requests
 import openai 
 import os
-
+import uuid
+from fastapi import APIRouter, status, Request
+from fastapi.responses import JSONResponse
+from typing import List
+from dotenv import load_dotenv
 from app.config import neo4j_client
 from app.models.source import Source, FindSourcesRequest, AddToLibraryRequest, RemoveFromLibraryRequest
 from app.agents.find_sources_agent import find_sources_from_prompt
@@ -169,9 +169,6 @@ def _unlink_source_from_library(tx, project_id: str, source_id: str):
     """
     tx.run(query, project_id=project_id, source_id=source_id)
 
-from fastapi import Request  # already likely imported
-import uuid
-
 @router.post("/project/{project_id}/library/add-curated")
 async def add_curated_source_and_link_to_library(project_id: str, request: Request):
     body = await request.json()
@@ -203,5 +200,5 @@ def _create_curated_source_node_and_link(tx, project_id: str, source_id: str, so
         publisher=source.get("publisher", "unknown"),
         headline=source.get("headline", "Untitled"),
         url=source.get("url", ""),
-        summary=source.get("summary", "No summary available.")
+        summary=source.get("summary", "Invalid source")
     )
