@@ -1,7 +1,7 @@
 #!/bin/sh
 # This script sets the Terraform variables and backend files.
 
-# Usage: PROJECT_ID="mormedi-aggregator-456814" REGION="europe-west1"  BRANCH_NAME="feature/My_Branch" CLOUD_RUN_IMAGE_NAME="gcr.io/mormedi-aggregator-456814/apis:21633de1a71039100926705408d95ba7d0ce56ef" ./set_tf_config.sh
+# Usage: PROJECT_ID="mormedi-aggregator-456814" LOCATION="europe-west1"  BRANCH_NAME="feature/clean_dev_infra" COMMIT_SHA="21633de1a71039100926705408d95ba7d0ce56ef" ./set_tf_config.sh
 
 # Paths of the files to be written
 SANITIZED_BRANCH_NAME_FILE="sanitized_branch_name.txt"
