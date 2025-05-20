@@ -200,6 +200,7 @@ const SourceRoundupPage = () => {
       console.error("Error fetching sources:", error);
     } finally {
       setIsQuerying(false);
+      scrollToBottom();
     }
   };
 
