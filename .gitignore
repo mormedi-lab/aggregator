@@ -67,4 +67,4 @@ lib-cov
 backend.tf
 terraform.tfvars
 sanitized_branch_name.txt
-apis_image_name.txt
+apis_image_name.txtapis/conf/.env.local
