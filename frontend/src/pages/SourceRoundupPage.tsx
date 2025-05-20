@@ -180,9 +180,6 @@ const SourceRoundupPage = () => {
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || "Failed to fetch sources");
   
-      const librarySources = await getProjectLibrary(projectId!);
-      const libraryIds = new Set(librarySources.map((s: any) => s.id));
-  
       const formattedNewSources = data.sources.map((src: any) => ({
         id: crypto.randomUUID(), // fallback in case the backend doesn’t provide ID
         headline: src.headline,
