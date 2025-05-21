@@ -1,7 +1,9 @@
 from agents import Agent, Runner, WebSearchTool
-import os
+from pydantic import ValidationError
+from typing import List
 import re
 import json
+from app.models.source import Source, Sources
 
 # Define the agent
 agent = Agent(
@@ -30,23 +32,24 @@ agent = Agent(
     tools=[WebSearchTool()]
 )
 
-async def find_sources_from_prompt(search_prompt: str) -> list[dict]:
+async def find_sources_from_prompt(search_prompt: str) -> List[Source]:
     result = await Runner.run(agent, search_prompt)
     raw_output = result.final_output
-
     print("\n📤 RAW AGENT OUTPUT:\n", raw_output)
 
     try:
-        return json.loads(raw_output)
-    except json.JSONDecodeError as e:
-        print("Failed to parse full JSON. Attempting fallback.\nError:", e)
-        
+        parsed = json.loads(raw_output)
+        return Sources.model_validate({"sources": parsed}).sources
+    except (json.JSONDecodeError, ValidationError) as e:
+        print("❌ Initial parse or validation failed:", e)
+
         match = re.search(r'\[\s*{.*?}\s*\]', raw_output, re.DOTALL)
         if match:
             try:
-                print("\n🧪 Extracted fallback JSON:\n", match.group(0))
-                return json.loads(match.group(0))
-            except json.JSONDecodeError as e:
-                print("Fallback array also failed:", e)
+                fallback = json.loads(match.group(0))
+                print("\n🧪 Extracted fallback JSON:\n", fallback)
+                return Sources.model_validate({"sources": fallback}).sources
+            except (json.JSONDecodeError, ValidationError) as fallback_e:
+                print("❌ Fallback validation also failed:", fallback_e)
 
-        return []
+    return []

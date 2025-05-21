@@ -4,6 +4,7 @@ from urllib.parse import urlparse as safe_urlparse
 from bs4 import BeautifulSoup
 
 from app.agents.summarize_url_agent import summarize_article
+from app.models.summary import SummaryResponse
 
 router = APIRouter()
 
@@ -22,11 +23,15 @@ def get_url_for_metadata(url: str):
         if not full_text:
             raise ValueError("No readable text found.")
 
-        summary = summarize_article(full_text)
+        summary_text = summarize_article(full_text)
+        if summary_text is None:
+            raise ValueError("Summary generation failed.")
+
+        summary = SummaryResponse(summary=summary_text)
 
         return {
             "headline": title,
-            "summary": summary,
+            "summary": summary.summary,
             "publisher": domain
         }
         
