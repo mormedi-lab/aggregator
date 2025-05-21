@@ -2,8 +2,9 @@ from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 from app.config import neo4j_client
 from app.agents.prompt_generator_agent import generate_prompt 
-
+from app.models.prompt import PromptInput
 from dotenv import load_dotenv
+
 load_dotenv()
 
 router = APIRouter()
@@ -49,6 +50,7 @@ async def generate_prompt_route(project_id: str):
         if not record:
             return JSONResponse(content={"error": "Project not found"}, status_code=404)
 
-        form_answers = {k: record[k] or "" for k in record.keys()}  # fill None with ""
-        prompt = await generate_prompt(form_answers)  
+        form_answers = {k: record[k] or "" for k in record.keys()}
+        data = PromptInput(**form_answers)
+        prompt = await generate_prompt(data)  
         return {"prompt": prompt}
