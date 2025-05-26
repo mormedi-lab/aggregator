@@ -2,8 +2,10 @@ from fastapi.testclient import TestClient
 import uuid
 import sys
 import os 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from app import app
+basepath = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
+if basepath not in sys.path:
+    sys.path.append(basepath)
+from app.main import app
 
 client = TestClient(app)
 

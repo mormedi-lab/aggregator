@@ -20,6 +20,10 @@ RUN pip install --no-cache-dir --upgrade -r /apis/requirements.txt
 # Assumes your FastAPI code is in a directory named 'app'
 COPY app /apis/app
 
+# TODO: It's not super clean to copy tests into the image, improve that.
+COPY tests /apis/tests
+RUN pytest
+
 # Command to run your application when the container starts
 # Uses gunicorn as the web server, binding to the port provided by Cloud Run ($PORT)
 # Adjust workers/threads based on your app's needs and Cloud Run instance size
