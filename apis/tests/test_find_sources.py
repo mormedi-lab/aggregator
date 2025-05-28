@@ -1,7 +1,7 @@
 import pytest
 from httpx import AsyncClient
 from unittest.mock import AsyncMock, patch, MagicMock
-from apis.app.main import app
+from app.main import app
 
 @pytest.mark.skip("I don't know how to mock it yet")
 @pytest.mark.asyncio
