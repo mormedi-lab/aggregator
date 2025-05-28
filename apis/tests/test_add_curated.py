@@ -1,22 +1,16 @@
-import pytest
-from fastapi import FastAPI
 from fastapi.testclient import TestClient
-from unittest.mock import patch, MagicMock
 
-@pytest.mark.asyncio
-@patch("apis.app.config.neo4j_client")
-def test_add_curated_source_success(mock_neo4j_client):
-    # Step 1: Mock Neo4j driver + session
-    mock_driver = MagicMock()
-    mock_session = MagicMock()
-    mock_driver.session.return_value.__enter__.return_value = mock_session
-    mock_session.write_transaction.return_value = None
-    mock_neo4j_client.return_value = mock_driver
+from app.config import get_neo4j_session
+from app.main import app
+from tests.MockSession import MockSession
 
-    # Step 2: Import router lazily
-    from apis.app.routes import source_routes
-    app = FastAPI()
-    app.include_router(source_routes.router)
+
+def test_add_curated_source_success():
+    # Step 1. Mock the Neo4j session to return a predefined result
+    app.dependency_overrides[get_neo4j_session] = lambda: MockSession()
+
+    # Step 2. Create a test client
+    client = TestClient(app)
 
     # Step 3: Payload
     payload = {
@@ -29,7 +23,6 @@ def test_add_curated_source_success(mock_neo4j_client):
     }
 
     # Step 4: POST to endpoint
-    client = TestClient(app)
     response = client.post("/project/test-abc/library/add-curated", json=payload)
 
     # Step 5: Assertions

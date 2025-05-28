@@ -1,20 +1,16 @@
-# app/routes/source_routes.py
-import requests
-import openai 
-import os
 import uuid
+from typing import List
+
+import openai
 from fastapi import APIRouter, status, Request
 from fastapi.responses import JSONResponse
-from typing import List
-from dotenv import load_dotenv
-from app.config import neo4j_client
-from app.models.source import Source, FindSourcesRequest, AddToLibraryRequest, RemoveFromLibraryRequest
-from app.agents.find_sources_agent import find_sources_from_prompt
 
-load_dotenv()
+from app.agents.find_sources_agent import find_sources_from_prompt
+from app.config import SessionNeo4j, load_conf
+from app.models.source import Source, FindSourcesRequest, AddToLibraryRequest, RemoveFromLibraryRequest
+
 router = APIRouter()
-driver = neo4j_client()
-openai.api_key = os.getenv("OPENAI_API_KEY")
+openai.api_key = load_conf("OPENAI_API_KEY")
 
 # find and persist sources for a project
 @router.post("/find_sources")
@@ -57,10 +53,9 @@ async def post_and_save_sources(request: FindSourcesRequest):
 
 # save sources to Neo4j
 @router.post("/projects/{project_id}/sources")
-def save_sources(project_id: str, sources: List[Source]):
-    with driver.session() as session:
-        for source in sources:
-            session.write_transaction(_create_source_node, project_id, source)
+def save_sources(session: SessionNeo4j, project_id: str, sources: List[Source]):
+    for source in sources:
+        session.write_transaction(_create_source_node, project_id, source)
     return {"status": "success", "message": f"{len(sources)} sources saved for project {project_id}"}
 
 def _create_source_node(tx, project_id: str, source: Source):
@@ -79,10 +74,9 @@ def _create_source_node(tx, project_id: str, source: Source):
     tx.run(query, project_id=project_id, publisher=source.publisher, headline=source.headline, url=source.url, summary=source.summary, is_curated=source.is_curated)
 
 @router.get("/projects/{project_id}/sources", response_model=List[Source])
-def get_sources_for_project(project_id: str):
+def get_sources_for_project(session: SessionNeo4j, project_id: str):
     # Route handler: Fetches all sources saved for a given project
-    with driver.session() as session:
-        result = session.read_transaction(_fetch_sources_for_project, project_id)
+    result = session.read_transaction(_fetch_sources_for_project, project_id)
     return result
 
 
@@ -112,10 +106,9 @@ def _fetch_sources_for_project(tx, project_id: str):
     ]
 
 @router.post("/project/{project_id}/library/add")
-def add_source_to_library(project_id: str, body: AddToLibraryRequest):
+def add_source_to_library(session: SessionNeo4j, project_id: str, body: AddToLibraryRequest):
     source_id = body.source_id
-    with driver.session() as session:
-        session.write_transaction(_link_source_to_library, project_id, source_id)
+    session.write_transaction(_link_source_to_library, project_id, source_id)
     return {"status": "success", "message": f"Source {source_id} added to library of project {project_id}"}
 
 def _link_source_to_library(tx, project_id: str, source_id: str):
@@ -126,9 +119,8 @@ def _link_source_to_library(tx, project_id: str, source_id: str):
     tx.run(query, project_id=project_id, source_id=source_id)
 
 @router.get("/project/{project_id}/library", response_model=List[Source])
-def get_project_library(project_id: str):
-    with driver.session() as session:
-        result = session.read_transaction(_fetch_project_library, project_id)
+def get_project_library(session: SessionNeo4j, project_id: str):
+    result = session.read_transaction(_fetch_project_library, project_id)
     return result
 
 def _fetch_project_library(tx, project_id: str):
@@ -156,10 +148,9 @@ def _fetch_project_library(tx, project_id: str):
     ]
 
 @router.post("/project/{project_id}/library/remove")
-def remove_source_from_library(project_id: str, body: RemoveFromLibraryRequest):
+def remove_source_from_library(session: SessionNeo4j, project_id: str, body: RemoveFromLibraryRequest):
     source_id = body.source_id
-    with driver.session() as session:
-        session.write_transaction(_unlink_source_from_library, project_id, source_id)
+    session.write_transaction(_unlink_source_from_library, project_id, source_id)
     return {"status": "success", "message": f"Source {source_id} removed from library of project {project_id}"}
 
 def _unlink_source_from_library(tx, project_id: str, source_id: str):
@@ -170,13 +161,12 @@ def _unlink_source_from_library(tx, project_id: str, source_id: str):
     tx.run(query, project_id=project_id, source_id=source_id)
 
 @router.post("/project/{project_id}/library/add-curated")
-async def add_curated_source_and_link_to_library(project_id: str, request: Request):
+async def add_curated_source_and_link_to_library(session: SessionNeo4j, project_id: str, request: Request):
     body = await request.json()
     source_data = body["source"]
 
     source_id = str(uuid.uuid4())  # generate stable ID
-    with driver.session() as session:
-        session.write_transaction(_create_curated_source_node_and_link, project_id, source_id, source_data)
+    session.write_transaction(_create_curated_source_node_and_link, project_id, source_id, source_data)
 
     return {"status": "success", "source_id": source_id, "message": f"Curated source added to project {project_id} and library."}
 
