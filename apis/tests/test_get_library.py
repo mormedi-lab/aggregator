@@ -1,12 +1,12 @@
-import pytest
-from fastapi import FastAPI
 from fastapi.testclient import TestClient
-from unittest.mock import patch, MagicMock
 
-@patch("apis.app.config.neo4j_client")
-@patch("apis.app.routes.source_routes._fetch_project_library")
-def test_get_project_library_success(mock_fetch_fn, mock_neo4j_client):
-    # Mock the return value of _fetch_project_library
+from app.config import get_neo4j_session
+from app.main import app
+from tests.MockSession import MockSession
+
+
+def test_get_project_library_success():
+    # 1. Mock the Neo4j session to return a predefined result
     mock_sources = [
         {
             "id": "s1",
@@ -25,24 +25,13 @@ def test_get_project_library_success(mock_fetch_fn, mock_neo4j_client):
             "is_curated": False
         }
     ]
-    mock_fetch_fn.return_value = mock_sources
+    app.dependency_overrides[get_neo4j_session] = lambda: MockSession(mock_sources)
 
-    # Mock Neo4j driver and session
-    mock_driver = MagicMock()
-    mock_driver.session.return_value.__enter__.return_value = MagicMock(
-        read_transaction=lambda fn, pid: fn(None, pid)  # call patched _fetch_project_library
-    )
-    mock_neo4j_client.return_value = mock_driver
-
-    # Import router and create FastAPI app
-    from apis.app.routes import source_routes
-    app = FastAPI()
-    app.include_router(source_routes.router)
-
-    # Call test client
+    # 2. Create a test client and make a request to the endpoint
     client = TestClient(app)
     response = client.get("/project/test-abc/library")
 
+    # 3. Assert the response
     assert response.status_code == 200
     data = response.json()
     assert isinstance(data, list)

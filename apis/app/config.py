@@ -1,7 +1,9 @@
 """Configuration for the application. Includes Neo4j client."""
 import os
+from typing import Annotated
 
-from neo4j import GraphDatabase
+from fastapi import Depends
+from neo4j import GraphDatabase, Session
 from neo4j import Driver
 from dotenv import load_dotenv
 from pathlib import Path
@@ -9,6 +11,7 @@ from pathlib import Path
 # Load from absolute path using pathlib
 env_path = Path(__file__).parent.parent / "conf" / ".env"
 load_dotenv(dotenv_path=env_path)
+
 
 def load_conf(key: str):
     """
@@ -22,7 +25,7 @@ def load_conf(key: str):
     return value
 
 
-def neo4j_client() -> Driver:
+def get_neo4j_session():
     """
     Create a Neo4j client.
     :return: The Neo4j driver.
@@ -35,4 +38,10 @@ def neo4j_client() -> Driver:
     # TODO: replace by logging
     print(f"# Neo4j URI: {uri}")
     # runs queries against the graph DB
-    return GraphDatabase.driver(uri, auth=(user, password))
+    driver = GraphDatabase.driver(uri, auth=(user, password))
+
+    with driver.session() as session:
+        yield session
+
+
+SessionNeo4j = Annotated[Session, Depends(get_neo4j_session)]
