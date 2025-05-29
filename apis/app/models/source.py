@@ -25,3 +25,4 @@ class Sources(BaseModel):
 
 class CuratedSourceRequest(BaseModel):
     source: Source
+

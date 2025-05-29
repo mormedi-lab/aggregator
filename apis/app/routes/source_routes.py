@@ -15,14 +15,15 @@ from app.services.neo4j_source_service import (
     create_curated_source_node_and_link,
 )
 from app.config import SessionNeo4j, load_conf
-from app.models.source import Source, FindSourcesRequest, AddToLibraryRequest, RemoveFromLibraryRequest, CuratedSourceRequest
+from app.models.source import Source, FindSourcesRequest, AddToLibraryRequest, RemoveFromLibraryRequest, CuratedSourceRequest, Sources
+from app.models.response import StatusResponse
 
 router = APIRouter()
 openai.api_key = load_conf("OPENAI_API_KEY")
 
 # find and persist sources for a project
-@router.post("/find_sources")
-async def post_and_save_sources(request: FindSourcesRequest)-> dict:
+@router.post("/find_sources", response_model=Sources)
+async def post_and_save_sources(request: FindSourcesRequest)-> Sources:
     project_id = request.project_id
     search_prompt = request.search_prompt
 
@@ -51,7 +52,7 @@ async def post_and_save_sources(request: FindSourcesRequest)-> dict:
         print(f"📦 Saving {len(source_models)} sources to project {project_id}")
         save_sources(project_id, source_models)
 
-        return {"sources": [s.model_dump() for s in sources]}  # Return raw data for frontend
+        return Sources(sources=sources)  
 
     except Exception as e:
         print("❌ Error in /find_sources:", str(e))
@@ -62,45 +63,45 @@ async def post_and_save_sources(request: FindSourcesRequest)-> dict:
 
 
 # save sources to Neo4j
-@router.post("/projects/{project_id}/sources")
-def save_sources(session: SessionNeo4j, project_id: str, sources: List[Source]):
-    for source in sources:
+@router.post("/projects/{project_id}/sources", response_model=StatusResponse)
+def save_sources(session: SessionNeo4j, project_id: str, body: Sources)-> StatusResponse:
+    for source in body.sources:
         session.write_transaction(create_source_node, project_id, source)
-    return {"status": "success", "message": f"{len(sources)} sources saved for project {project_id}"}
+    return StatusResponse(status="success", message=f"{len(body.sources)} sources saved for project {project_id}")
 
-@router.get("/projects/{project_id}/sources", response_model=List[Source])
-def get_sources_for_project(session: SessionNeo4j, project_id: str):
+@router.get("/projects/{project_id}/sources", response_model=Sources)
+def get_sources_for_project(session: SessionNeo4j, project_id: str)-> Sources:
     # Route handler: Fetches all sources saved for a given project
     result = session.read_transaction(fetch_sources_for_project, project_id)
-    return result
+    return Sources(sources=result)
 
 
-@router.post("/project/{project_id}/library/add")
+@router.post("/project/{project_id}/library/add", response_model=StatusResponse)
 def add_source_to_library(session: SessionNeo4j, project_id: str, body: AddToLibraryRequest)-> dict:
     source_id = body.source_id
     session.write_transaction(link_source_to_library, project_id, source_id)
-    return {"status": "success", "message": f"Source {source_id} added to library of project {project_id}"}
+    return StatusResponse(status="success", message=f"Source {source_id} added to library of project {project_id}")
 
 
-@router.get("/project/{project_id}/library", response_model=List[Source])
-def get_project_library(session: SessionNeo4j, project_id: str):
+@router.get("/project/{project_id}/library", response_model=Sources)
+def get_project_library(session: SessionNeo4j, project_id: str)-> Sources:
     result = session.read_transaction(fetch_project_library, project_id)
-    return result
+    return Sources(sources=result)
 
 
-@router.post("/project/{project_id}/library/remove")
-def remove_source_from_library(session: SessionNeo4j, project_id: str, body: RemoveFromLibraryRequest):
+@router.post("/project/{project_id}/library/remove",response_model=StatusResponse)
+def remove_source_from_library(session: SessionNeo4j, project_id: str, body: RemoveFromLibraryRequest)-> dict:
     source_id = body.source_id
     session.write_transaction(unlink_source_from_library, project_id, source_id)
-    return {"status": "success", "message": f"Source {source_id} removed from library of project {project_id}"}
+    return StatusResponse(status="success", message=f"Source {source_id} removed from library of project {project_id}")
 
 
-@router.post("/project/{project_id}/library/add-curated")
+@router.post("/project/{project_id}/library/add-curated", response_model=StatusResponse)
 async def add_curated_source_and_link_to_library(session: SessionNeo4j, project_id: str, body: CuratedSourceRequest, request: Request)-> dict:
     source_data = body.source.model_dump()
 
     source_id = str(uuid.uuid4())  # generate stable ID
     session.write_transaction(create_curated_source_node_and_link, project_id, source_id, source_data)
 
-    return {"status": "success", "source_id": source_id, "message": f"Curated source added to project {project_id} and library."}
+    return StatusResponse(status="success", message=f"Curated source added to project {project_id} and library.", source_id=source_id)
 

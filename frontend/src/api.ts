@@ -7,7 +7,8 @@ console.log("API URL:", API);
 export async function fetchProjects() {
   const res = await fetch(`${API}/projects`);
   if (!res.ok) throw new Error("Failed to fetch projects");
-  return res.json();
+  const data = await res.json();
+  return data.projects;
 }
 
 export async function createProject(project: {
@@ -113,7 +114,8 @@ export async function postAndSaveSources(projectId: string, prompt: string) {
 export async function getSavedSources(projectId: string) {
   const res = await fetch(`${API}/projects/${projectId}/sources`);
   if (!res.ok) throw new Error("Failed to fetch saved sources");
-  return res.json();
+  const data = await res.json();
+  return data.sources;
 }
 
 export async function addSourceToLibrary(projectId: string, sourceId: string) {
@@ -126,13 +128,15 @@ export async function addSourceToLibrary(projectId: string, sourceId: string) {
   });
 
   if (!res.ok) throw new Error("Failed to add source to library");
-  return res.json();
+  const data = await res.json();
+  return data;
 }
 
 export async function getProjectLibrary(projectId: string) {
   const res = await fetch(`${API}/project/${projectId}/library`);
   if (!res.ok) throw new Error("Failed to load library");
-  return res.json();
+  const data = await res.json();
+  return data.sources;
 }
 
 export async function removeSourceFromLibrary(projectId: string, sourceId: string) {
@@ -145,7 +149,8 @@ export async function removeSourceFromLibrary(projectId: string, sourceId: strin
   });
 
   if (!res.ok) throw new Error("Failed to remove source from library");
-  return res.json();
+  const data = await res.json();
+  return data;
 }
 
 export async function fetchMetadataFromUrl(url: string) {
