@@ -47,7 +47,7 @@ def test_get_all_projects():
     assert "projects" in data
     assert isinstance(data["projects"], list)
     assert len(response.json()) == 1
-    assert response.json() == return_value
+    assert response.json()["projects"] == return_value
 
 
 def test_get_project_by_id():
