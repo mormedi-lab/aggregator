@@ -37,6 +37,6 @@ def test_get_all_project_sources():
     assert isinstance(data, dict)
     assert "sources" in data
     assert isinstance(data["sources"], list)
-    assert len(data) == 2
+    assert len(data["sources"]) == 2
     assert data[0]["is_curated"] is True
     assert data[1]["publisher"] == "Auto Today"

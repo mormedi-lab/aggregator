@@ -9,8 +9,3 @@ class StatusResponse(BaseModel):
 class ProjectStatusResponse(BaseModel):
     status: str
     id: Optional[str] = None
-
-class MetadataResponse(BaseModel):
-    headline: str
-    summary: str
-    publisher: str
