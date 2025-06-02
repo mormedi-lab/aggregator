@@ -43,15 +43,22 @@ const SourceRoundupPage = () => {
   useEffect(() => {
     const loadData = async () => {
       try {
-        // 1. Fetch project info
+        // fetch project info
         const projectData = await fetchProjectById(projectId!);
+        console.log("✅ Project loaded:", projectData);
         setProjectTitle(projectData.title);
-
+  
+        // fetch project sources
         const projectSources = await getSavedSources(projectId!);
+        console.log("✅ Sources loaded:", projectSources);
+  
+        // fetch saved library
         const librarySources = await getProjectLibrary(projectId!);
+        console.log("✅ Library loaded:", librarySources);
+  
         const libraryIds = new Set(librarySources.map((s: any) => s.id));
-
-        // 2. Try to get saved sources
+  
+        // render saved sources
         if (projectSources.length > 0) {
           const formatted = projectSources.map((src: any) => ({
             id: src.id,
@@ -65,12 +72,17 @@ const SourceRoundupPage = () => {
           }));
           setSources(formatted);
         } else {
-          // 3. Generate prompt and save sources if none exist
+          console.log("ℹ️ No saved sources, generating from prompt...");
+  
           const promptRes = await generatePrompt(projectId!);
+          console.log("✅ Prompt generated:", promptRes);
+  
           await postAndSaveSources(projectId!, promptRes.prompt);
-
-          //  Immediately fetch saved state from DB, right after live generation
+          console.log("✅ Sources saved from generation");
+  
           const refreshed = await getSavedSources(projectId!);
+          console.log("✅ Refetched sources:", refreshed);
+  
           const formatted = refreshed.map((src: any) => ({
             id: src.id,
             headline: src.headline,
@@ -83,7 +95,7 @@ const SourceRoundupPage = () => {
           setSources(formatted);
         }
       } catch (err) {
-        console.error(err);
+        console.error("Load error:", err);
         setError("Something went wrong while loading sources.");
       } finally {
         setLoading(false);
@@ -91,8 +103,8 @@ const SourceRoundupPage = () => {
     };
   
     loadData();
-  }, [projectId]);  
-  
+  }, [projectId]);
+
 
   // Function to handle adding a curated source from URL
   const handleAddCuratedSource = async (url: string) => {

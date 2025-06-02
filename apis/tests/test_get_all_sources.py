@@ -34,7 +34,9 @@ def test_get_all_project_sources():
     # 3. Assert
     assert response.status_code == 200
     data = response.json()
-    assert isinstance(data, list)
-    assert len(data) == 2
-    assert data[0]["is_curated"] is True
-    assert data[1]["publisher"] == "Auto Today"
+    assert isinstance(data, dict)
+    assert "sources" in data
+    assert isinstance(data["sources"], list)
+    assert len(data["sources"]) == 2
+    assert data["sources"][0]["is_curated"] is True
+    assert data["sources"][1]["publisher"] == "Auto Today"

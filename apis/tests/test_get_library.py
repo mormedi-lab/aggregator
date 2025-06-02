@@ -34,8 +34,10 @@ def test_get_project_library_success():
     # 3. Assert the response
     assert response.status_code == 200
     data = response.json()
-    assert isinstance(data, list)
-    assert len(data) == 2
-    assert data[0]["headline"] == "Dog-Friendly Cars 2024"
-    assert data[1]["id"] == "s2"
-    assert data[1]["is_curated"] is False
+    assert isinstance(data, dict)
+    assert "sources" in data
+    assert isinstance(data["sources"], list)
+    assert len(data["sources"]) == 2
+    assert data["sources"][0]["headline"] == "Dog-Friendly Cars 2024"
+    assert data["sources"][1]["id"] == "s2"
+    assert data["sources"][1]["is_curated"] is False

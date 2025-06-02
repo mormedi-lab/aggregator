@@ -6,15 +6,24 @@ from fastapi import APIRouter, status, Request
 from fastapi.responses import JSONResponse
 
 from app.agents.find_sources_agent import find_sources_from_prompt
+from app.services.neo4j_source_service import (
+    create_source_node,
+    fetch_sources_for_project,
+    link_source_to_library,
+    fetch_project_library,
+    unlink_source_from_library,
+    create_curated_source_node_and_link,
+)
 from app.config import SessionNeo4j, load_conf
-from app.models.source import Source, FindSourcesRequest, AddToLibraryRequest, RemoveFromLibraryRequest
+from app.models.source import Source, FindSourcesRequest, AddToLibraryRequest, RemoveFromLibraryRequest, CuratedSourceRequest, Sources
+from app.models.response import StatusResponse
 
 router = APIRouter()
 openai.api_key = load_conf("OPENAI_API_KEY")
 
 # find and persist sources for a project
-@router.post("/find_sources")
-async def post_and_save_sources(request: FindSourcesRequest):
+@router.post("/find_sources", response_model=Sources)
+async def post_and_save_sources(session: SessionNeo4j, request: FindSourcesRequest)-> Sources:
     project_id = request.project_id
     search_prompt = request.search_prompt
 
@@ -27,21 +36,24 @@ async def post_and_save_sources(request: FindSourcesRequest):
         sources = await find_sources_from_prompt(search_prompt)
         print("✅ Received sources:", sources)
 
-        source_models = []
-        for s in sources:
-            if all(k in s for k in ("publisher", "headline", "url")):
-                source_models.append(Source(
-                    publisher=s["publisher"],
-                    headline=s["headline"],
-                    url=s["url"],
-                    summary=s.get("summary", ""),
-                    is_curated=False
-                ))
+        # Convert validated Pydantic Source objects to new instances
+        source_models = [
+            Source(
+                publisher=s.publisher,
+                headline=s.headline,
+                url=s.url,
+                summary=s.summary or "",
+                is_curated=False
+            )
+            for s in sources
+            if s.publisher and s.headline and s.url
+        ]
 
         print(f"📦 Saving {len(source_models)} sources to project {project_id}")
-        save_sources(project_id, source_models)
+        for source in source_models:
+            session.write_transaction(create_source_node, project_id, source)
 
-        return {"sources": sources}
+        return Sources(sources=sources)  
 
     except Exception as e:
         print("❌ Error in /find_sources:", str(e))
@@ -50,145 +62,46 @@ async def post_and_save_sources(request: FindSourcesRequest):
             content={"error": str(e)}
         )
 
-
 # save sources to Neo4j
-@router.post("/projects/{project_id}/sources")
-def save_sources(session: SessionNeo4j, project_id: str, sources: List[Source]):
-    for source in sources:
-        session.write_transaction(_create_source_node, project_id, source)
-    return {"status": "success", "message": f"{len(sources)} sources saved for project {project_id}"}
+@router.post("/projects/{project_id}/sources", response_model=StatusResponse)
+def save_sources(session: SessionNeo4j, project_id: str, body: Sources)-> StatusResponse:
+    for source in body.sources:
+        session.write_transaction(create_source_node, project_id, source)
+    return StatusResponse(status="success", message=f"{len(body.sources)} sources saved for project {project_id}")
 
-def _create_source_node(tx, project_id: str, source: Source):
-    query = """
-    MATCH (p:Project {id: $project_id})
-    CREATE (s:Source {
-        id: randomUUID(),
-        publisher: $publisher,
-        headline: $headline,
-        url: $url,
-        summary: $summary,
-        is_curated: $is_curated
-    })
-    CREATE (p)-[:HAS_SOURCE]->(s)
-    """
-    tx.run(query, project_id=project_id, publisher=source.publisher, headline=source.headline, url=source.url, summary=source.summary, is_curated=source.is_curated)
-
-@router.get("/projects/{project_id}/sources", response_model=List[Source])
-def get_sources_for_project(session: SessionNeo4j, project_id: str):
+@router.get("/projects/{project_id}/sources", response_model=Sources)
+def get_sources_for_project(session: SessionNeo4j, project_id: str)-> Sources:
     # Route handler: Fetches all sources saved for a given project
-    result = session.read_transaction(_fetch_sources_for_project, project_id)
-    return result
+    result = session.read_transaction(fetch_sources_for_project, project_id)
+    return Sources(sources=result)
 
 
-def _fetch_sources_for_project(tx, project_id: str):
-    # Neo4j transaction: Queries and returns sources linked to a project
-    query = """
-    MATCH (p:Project {id: $project_id})-[:HAS_SOURCE]->(s:Source)
-    RETURN 
-        s.id AS id, 
-        s.publisher AS publisher,
-        s.headline AS headline, 
-        s.url AS url, 
-        coalesce(s.summary, "") AS summary,
-        coalesce(s.is_curated, false) AS is_curated
-    """
-    results = tx.run(query, project_id=project_id)
-    return [
-        {
-            "id": record["id"],
-            "publisher": record["publisher"],
-            "headline": record["headline"],
-            "url": record["url"],
-            "summary": record["summary"],
-            "is_curated": record["is_curated"]
-        }
-        for record in results
-    ]
-
-@router.post("/project/{project_id}/library/add")
-def add_source_to_library(session: SessionNeo4j, project_id: str, body: AddToLibraryRequest):
+@router.post("/project/{project_id}/library/add", response_model=StatusResponse)
+def add_source_to_library(session: SessionNeo4j, project_id: str, body: AddToLibraryRequest)-> dict:
     source_id = body.source_id
-    session.write_transaction(_link_source_to_library, project_id, source_id)
-    return {"status": "success", "message": f"Source {source_id} added to library of project {project_id}"}
+    session.write_transaction(link_source_to_library, project_id, source_id)
+    return StatusResponse(status="success", message=f"Source {source_id} added to library of project {project_id}")
 
-def _link_source_to_library(tx, project_id: str, source_id: str):
-    query = """
-    MATCH (p:Project {id: $project_id}), (s:Source {id: $source_id})
-    MERGE (p)-[:IS_IN_LIBRARY]->(s)
-    """
-    tx.run(query, project_id=project_id, source_id=source_id)
 
-@router.get("/project/{project_id}/library", response_model=List[Source])
-def get_project_library(session: SessionNeo4j, project_id: str):
-    result = session.read_transaction(_fetch_project_library, project_id)
-    return result
+@router.get("/project/{project_id}/library", response_model=Sources)
+def get_project_library(session: SessionNeo4j, project_id: str)-> Sources:
+    result = session.read_transaction(fetch_project_library, project_id)
+    return Sources(sources=result)
 
-def _fetch_project_library(tx, project_id: str):
-    query = """
-    MATCH (p:Project {id: $project_id})-[:IS_IN_LIBRARY]->(s:Source)
-    RETURN 
-        s.id AS id, 
-        s.headline AS headline,
-        s.publisher AS publisher,
-        s.url AS url,
-        coalesce(s.summary, "") AS summary,
-        coalesce(s.is_curated, false) AS is_curated
-    """
-    results = tx.run(query, project_id=project_id)
-    return [
-        {
-            "id": record["id"],
-            "headline": record["headline"],
-            "publisher": record["publisher"],
-            "url": record["url"],
-            "summary": record["summary"],
-            "is_curated": record["is_curated"]
-        }
-        for record in results
-    ]
 
-@router.post("/project/{project_id}/library/remove")
-def remove_source_from_library(session: SessionNeo4j, project_id: str, body: RemoveFromLibraryRequest):
+@router.post("/project/{project_id}/library/remove",response_model=StatusResponse)
+def remove_source_from_library(session: SessionNeo4j, project_id: str, body: RemoveFromLibraryRequest)-> dict:
     source_id = body.source_id
-    session.write_transaction(_unlink_source_from_library, project_id, source_id)
-    return {"status": "success", "message": f"Source {source_id} removed from library of project {project_id}"}
+    session.write_transaction(unlink_source_from_library, project_id, source_id)
+    return StatusResponse(status="success", message=f"Source {source_id} removed from library of project {project_id}")
 
-def _unlink_source_from_library(tx, project_id: str, source_id: str):
-    query = """
-    MATCH (p:Project {id: $project_id})-[r:IS_IN_LIBRARY]->(s:Source {id: $source_id})
-    DELETE r
-    """
-    tx.run(query, project_id=project_id, source_id=source_id)
 
-@router.post("/project/{project_id}/library/add-curated")
-async def add_curated_source_and_link_to_library(session: SessionNeo4j, project_id: str, request: Request):
-    body = await request.json()
-    source_data = body["source"]
+@router.post("/project/{project_id}/library/add-curated", response_model=StatusResponse)
+async def add_curated_source_and_link_to_library(session: SessionNeo4j, project_id: str, body: CuratedSourceRequest, request: Request)-> dict:
+    source_data = body.source.model_dump()
 
     source_id = str(uuid.uuid4())  # generate stable ID
-    session.write_transaction(_create_curated_source_node_and_link, project_id, source_id, source_data)
+    session.write_transaction(create_curated_source_node_and_link, project_id, source_id, source_data)
 
-    return {"status": "success", "source_id": source_id, "message": f"Curated source added to project {project_id} and library."}
+    return StatusResponse(status="success", message=f"Curated source added to project {project_id} and library.", source_id=source_id)
 
-def _create_curated_source_node_and_link(tx, project_id: str, source_id: str, source: dict):
-    query = """
-    MATCH (p:Project {id: $project_id})
-    CREATE (s:Source {
-        id: $source_id,
-        publisher: $publisher,
-        headline: $headline,
-        url: $url,
-        summary: $summary,
-        is_curated: true
-    })
-    CREATE (p)-[:HAS_SOURCE]->(s)
-    CREATE (p)-[:IS_IN_LIBRARY]->(s)
-    """
-    tx.run(query,
-        project_id=project_id,
-        source_id=source_id,
-        publisher=source.get("publisher", "unknown"),
-        headline=source.get("headline", "Untitled"),
-        url=source.get("url", ""),
-        summary=source.get("summary", "Invalid source")
-    )

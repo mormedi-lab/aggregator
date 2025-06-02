@@ -1,14 +1,15 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 import requests
 from urllib.parse import urlparse as safe_urlparse
 from bs4 import BeautifulSoup
 
 from app.agents.summarize_url_agent import summarize_article
+from app.models.summary import MetadataResponse
 
 router = APIRouter()
 
-@router.get("/metadata")
-def get_url_for_metadata(url: str):
+@router.get("/metadata", response_model=MetadataResponse)
+def get_url_for_metadata(url: str) -> MetadataResponse:
     try:
         response = requests.get(url, timeout=15)
         response.raise_for_status()
@@ -22,14 +23,15 @@ def get_url_for_metadata(url: str):
         if not full_text:
             raise ValueError("No readable text found.")
 
-        summary = summarize_article(full_text)
+        summary_text = summarize_article(full_text)
+        if summary_text is None:
+            raise ValueError("Summary generation failed.")
 
-        return {
-            "headline": title,
-            "summary": summary,
-            "publisher": domain
-        }
-        
+        return MetadataResponse(
+            headline=title,
+            summary=summary_text,
+            publisher=domain
+        )
 
     except Exception as e:
-        return {"error": f"Could not fetch or summarize metadata: {str(e)}"}
+        raise HTTPException(status_code=500, detail=f"Could not fetch or summarize metadata: {str(e)}")

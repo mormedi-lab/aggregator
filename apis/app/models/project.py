@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 
 class ProjectCreate(BaseModel):
     title: str
@@ -12,3 +12,6 @@ class Project(ProjectCreate):
 
 class ProjectUpdate(ProjectCreate):
     id: str
+
+class Projects(BaseModel):
+    projects: List[Project]
