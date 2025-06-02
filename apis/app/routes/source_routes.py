@@ -23,7 +23,7 @@ openai.api_key = load_conf("OPENAI_API_KEY")
 
 # find and persist sources for a project
 @router.post("/find_sources", response_model=Sources)
-async def post_and_save_sources(request: FindSourcesRequest)-> Sources:
+async def post_and_save_sources(session: SessionNeo4j, request: FindSourcesRequest)-> Sources:
     project_id = request.project_id
     search_prompt = request.search_prompt
 
@@ -50,7 +50,8 @@ async def post_and_save_sources(request: FindSourcesRequest)-> Sources:
         ]
 
         print(f"📦 Saving {len(source_models)} sources to project {project_id}")
-        save_sources(project_id, source_models)
+        for source in source_models:
+            session.write_transaction(create_source_node, project_id, source)
 
         return Sources(sources=sources)  
 
@@ -60,7 +61,6 @@ async def post_and_save_sources(request: FindSourcesRequest)-> Sources:
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={"error": str(e)}
         )
-
 
 # save sources to Neo4j
 @router.post("/projects/{project_id}/sources", response_model=StatusResponse)
