@@ -51,23 +51,8 @@ function ProjectsPage() {
     setProjectToDelete(null);
   };
 
-  const handleProjectClick = async (project: Project) => {
-    try {
-      // Check if the project has benchmark data
-      const benchmarkData = await fetchBenchmark(project.id);
-      
-      // If benchmark data exists, go directly to sources page
-      if (benchmarkData && Object.keys(benchmarkData).length > 0 && benchmarkData.objective) {
-        navigate(`/project/${project.id}/sources`);
-      } else {
-        // Otherwise go to the project details page for editing
-        navigate(`/project/${project.id}`);
-      }
-    } catch (err) {
-      console.error('Error checking benchmark status:', err);
-      // If there's an error, default to the project details page
-      navigate(`/project/${project.id}`);
-    }
+  const handleProjectClick = (project: Project) => {
+    navigate(`/project/${project.id}/dashboard`);
   };
 
   // Fetch all projects and check for benchmark data

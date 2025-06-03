@@ -159,6 +159,34 @@ export async function fetchMetadataFromUrl(url: string) {
   return res.json();
 }
 
+export async function createResearchSpace(projectId: string, query: string, searchType: string) {
+  const response = await fetch(`${API}/project/${projectId}/spaces`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ query, search_type: searchType }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to create research space");
+  }
+
+  return await response.json();
+}
+
+
+export async function fetchResearchSpaces(projectId: string) {
+  const res = await fetch(`${API}/project/${projectId}/spaces`);
+  if (!res.ok) throw new Error("Failed to fetch research spaces");
+  const data = await res.json();
+  return Array.isArray(data) ? data : [];
+}
+
+
+
+
+
 
 
 

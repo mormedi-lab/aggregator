@@ -3,7 +3,7 @@ import AppLayout from "./layout/AppLayout";
 import LoginPage from "./pages/LoginPage";
 import ProjectsPage from "./pages/ProjectsPage";
 import ProjectDefinitionPage from "./pages/ProjectDefinitionPage";
-import BenchmarkDefinitionPage from "./pages/BenchmarkDefinitionPage";
+import ProjectDashboardPage from "./pages/ProjectDashboardPage";
 import SourceRoundupPage from "./pages/SourceRoundupPage";
 import LibraryPage from "./pages/LibraryPage";
 import AppLayoutWithTopNav from "./layout/AppLayoutWithTopNav";
@@ -41,10 +41,10 @@ function App() {
       />
 
       <Route
-        path="/project/:id/benchmark"
+        path="/project/:id/dashboard"
         element={
           <AppLayout>
-            <BenchmarkDefinitionPage  />
+            <ProjectDashboardPage  />
           </AppLayout>
         }
       />
@@ -52,18 +52,18 @@ function App() {
       <Route
         path="/project/:id/sources"
         element={
-          <AppLayoutWithTopNav>
+          <AppLayout>
             <SourceRoundupPage   />
-          </AppLayoutWithTopNav>
+          </AppLayout>
         }
       />
 
     <Route
       path="/project/:id/library"
       element={
-        <AppLayoutWithTopNav>
+        <AppLayout>
           <LibraryPage />
-        </AppLayoutWithTopNav>
+        </AppLayout>
       }
     />
 
