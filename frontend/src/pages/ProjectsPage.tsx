@@ -5,6 +5,7 @@ import DeleteConfirmationModal from '../components/DeleteConfirmationModal';
 import ProjectCard from '../components/ProjectCard';
 import SearchBar from "../components/SearchBar";
 import SortBy from "../components/SortBy";
+import NewProjectModal from "../components/NewProjectModal";
 
 interface Project {
   id: string;
@@ -19,6 +20,8 @@ function ProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+
+  const [isNewProjectOpen, setNewProjectOpen] = useState(false);
 
   const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
   const [projectToDelete, setProjectToDelete] = useState<{ id: string; name: string } | null>(null);
@@ -107,7 +110,7 @@ function ProjectsPage() {
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-regular text-[#2D2114]">All Projects</h1>
           <button
-            onClick={() => navigate("/new")}
+            onClick={() => setNewProjectOpen(true)}
             className="bg-[#FF5400] hover:bg-[#ff6a1a] text-white px-5 py-[10px] rounded-md text-sm leading-[1.2rem] font-medium shadow-sm"
           >
             + New Project
@@ -141,7 +144,9 @@ function ProjectsPage() {
           </div>
         )}
       </div>
-      
+
+      <NewProjectModal isOpen={isNewProjectOpen} onClose={() => setNewProjectOpen(false)} />
+
       <DeleteConfirmationModal
         isOpen={isDeleteModalOpen}
         projectName={projectToDelete?.name || ''}

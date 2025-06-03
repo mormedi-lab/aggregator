@@ -10,9 +10,10 @@ export default function Sidebar() {
         <img
           src="/src/assets/icons/menu.png"
           alt="Menu"
-          className="w-6 h-6 transition"
+          className="w-7 h-7 transition"
         />
       </button>
+      {/* Add more icons here in the future */}
       <div className="mt-auto mb-2">
         <div className="w-8 h-8 rounded-full bg-[#E0D8CF] flex items-center justify-center text-[#2D2114] text-[10px] font-medium tracking-wide">
           M
