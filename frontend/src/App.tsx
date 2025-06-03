@@ -2,11 +2,8 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import AppLayout from "./layout/AppLayout";
 import LoginPage from "./pages/LoginPage";
 import ProjectsPage from "./pages/ProjectsPage";
-import ProjectDefinitionPage from "./pages/ProjectDefinitionPage";
-import BenchmarkDefinitionPage from "./pages/BenchmarkDefinitionPage";
-import SourceRoundupPage from "./pages/SourceRoundupPage";
-import LibraryPage from "./pages/LibraryPage";
-import AppLayoutWithTopNav from "./layout/AppLayoutWithTopNav";
+import ProjectDashboardPage from "./pages/ProjectDashboardPage";
+import ResearchSpacePage from "./pages/ResearchSpacePage";
 
 function App() {
   return (
@@ -23,49 +20,22 @@ function App() {
       />
 
       <Route
-        path="/new"
+        path="/project/:id/dashboard"
         element={
           <AppLayout>
-            <ProjectDefinitionPage />
+            <ProjectDashboardPage  />
           </AppLayout>
         }
       />
 
       <Route
-        path="/project/:id"
+        path="/project/:id/space/:spaceId"
         element={
           <AppLayout>
-            <ProjectDefinitionPage />
+            <ResearchSpacePage />
           </AppLayout>
         }
       />
-
-      <Route
-        path="/project/:id/benchmark"
-        element={
-          <AppLayout>
-            <BenchmarkDefinitionPage  />
-          </AppLayout>
-        }
-      />
-
-      <Route
-        path="/project/:id/sources"
-        element={
-          <AppLayoutWithTopNav>
-            <SourceRoundupPage   />
-          </AppLayoutWithTopNav>
-        }
-      />
-
-    <Route
-      path="/project/:id/library"
-      element={
-        <AppLayoutWithTopNav>
-          <LibraryPage />
-        </AppLayoutWithTopNav>
-      }
-    />
 
       {/* Fallback redirect */}
       <Route path="*" element={<Navigate to="/projects" replace />} />

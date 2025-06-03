@@ -1,20 +1,12 @@
 import { useEffect, useState } from "react";
-import { fetchProjects, deleteProject, fetchBenchmark } from "../api";
+import { fetchProjects, deleteProject } from "../api";
 import { useNavigate } from "react-router-dom";
 import DeleteConfirmationModal from '../components/DeleteConfirmationModal';
 import ProjectCard from '../components/ProjectCard';
 import SearchBar from "../components/SearchBar";
 import SortBy from "../components/SortBy";
 import NewProjectModal from "../components/NewProjectModal";
-
-interface Project {
-  id: string;
-  title: string;
-  industry: string;
-  objective: string;
-  last_accessed: string;
-  hasBenchmark?: boolean;
-}
+import { Project } from "../types";
 
 function ProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -51,56 +43,24 @@ function ProjectsPage() {
     setProjectToDelete(null);
   };
 
-  const handleProjectClick = async (project: Project) => {
-    try {
-      // Check if the project has benchmark data
-      const benchmarkData = await fetchBenchmark(project.id);
-      
-      // If benchmark data exists, go directly to sources page
-      if (benchmarkData && Object.keys(benchmarkData).length > 0 && benchmarkData.objective) {
-        navigate(`/project/${project.id}/sources`);
-      } else {
-        // Otherwise go to the project details page for editing
-        navigate(`/project/${project.id}`);
-      }
-    } catch (err) {
-      console.error('Error checking benchmark status:', err);
-      // If there's an error, default to the project details page
-      navigate(`/project/${project.id}`);
-    }
+  const handleProjectClick = (project: Project) => {
+    navigate(`/project/${project.id}/dashboard`);
   };
 
-  // Fetch all projects and check for benchmark data
+  // Fetch all projects 
   useEffect(() => {
     const loadProjects = async () => {
       try {
         const data = await fetchProjects();
         const cleaned = data.filter((p: any) => p.id);
-        
-        // Check benchmark status for all projects
-        const projectsWithStatus = await Promise.all(
-          cleaned.map(async (project: Project) => {
-            try {
-              const benchmarkData = await fetchBenchmark(project.id);
-              return {
-                ...project,
-                hasBenchmark: benchmarkData && Object.keys(benchmarkData).length > 0 && benchmarkData.objective
-              };
-            } catch (err) {
-              console.error(`Error checking benchmark for project ${project.id}:`, err);
-              return { ...project, hasBenchmark: false };
-            }
-          })
-        );
-        
-        setProjects(projectsWithStatus);
+        setProjects(cleaned);
       } catch (err) {
         console.error('Error loading projects:', err);
       } finally {
         setLoading(false);
       }
     };
-    
+  
     loadProjects();
   }, []);
   

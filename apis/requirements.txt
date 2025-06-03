@@ -8,3 +8,4 @@ openai
 openai-agents
 beautifulsoup4
 lxml
+pytest-asyncio
