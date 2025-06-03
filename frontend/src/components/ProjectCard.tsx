@@ -19,10 +19,10 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick, onDelete })
   return (
     <div
       onClick={() => onClick(project)}
-      className="bg-[#F2F2F2] p-5 rounded-xl shadow-sm border border-[#E6E6E6] cursor-pointer hover:shadow-md transition relative"
+      className="bg-[#FAF9F5] hover:bg-white border border-[#E0D8CF] p-5 rounded-lg cursor-pointer hover:shadow-md transition"
     >
       <div className="flex justify-between items-start mb-2">
-        <h2 className="text-lg font-semibold text-[#0F1122]">
+        <h2 className="text-lg font-regular text-[#2D2114]">
           {project.title}
         </h2>
         <button 
@@ -32,8 +32,8 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick, onDelete })
           ✕
         </button>
       </div>
-      <p className="text-sm text-[#555]">{project.industry}</p>
-      <p className="mt-3 text-xs text-[#999]">
+      <p className="text-sm text-[#827F7F]">{project.objective}</p>
+      <p className="mt-3 text-xs text-[#827F7F]">
         Last accessed: {project.last_accessed}
       </p>
     </div>

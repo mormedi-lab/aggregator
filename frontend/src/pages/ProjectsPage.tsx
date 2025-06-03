@@ -3,6 +3,8 @@ import { fetchProjects, deleteProject, fetchBenchmark } from "../api";
 import { useNavigate } from "react-router-dom";
 import DeleteConfirmationModal from '../components/DeleteConfirmationModal';
 import ProjectCard from '../components/ProjectCard';
+import SearchBar from "../components/SearchBar";
+import SortBy from "../components/SortBy";
 
 interface Project {
   id: string;
@@ -100,23 +102,24 @@ function ProjectsPage() {
   }, []);
   
   return (
-    <div className="min-h-screen bg-white px-4 py-12">
+    <div className="min-h-screen bg-[#FAF9F5] px-6 py-10">
       <div className="max-w-7xl mx-auto">
-        <div className="flex justify-between items-center mb-10">
-          <h1 className="text-4xl font-semibold text-[#0F1122]">
-            Your Research Spaces
-          </h1>
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-3xl font-regular text-[#2D2114]">All Projects</h1>
           <button
             onClick={() => navigate("/new")}
-            className="bg-[#F84C39] hover:bg-[#F83A27] text-white px-5 py-2 rounded-md text-sm font-medium shadow-md"
+            className="bg-[#FF5400] hover:bg-[#ff6a1a] text-white px-5 py-[10px] rounded-md text-sm leading-[1.2rem] font-medium shadow-sm"
           >
             + New Project
           </button>
         </div>
-
+        <div className="mb-4">
+          <SearchBar />
+        </div>
+        <SortBy />
         {loading ? (
           <div className="text-center py-8">
-            <div className="animate-spin rounded-full h-10 w-10 border-4 border-[#F84C39] border-t-transparent mx-auto"></div>
+            <div className="animate-spin rounded-full h-10 w-10 border-4 border-[#FF5400] border-t-transparent mx-auto"></div>
             <p className="mt-4 text-gray-500">Loading projects...</p>
           </div>
         ) : (

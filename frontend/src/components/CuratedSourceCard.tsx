@@ -41,7 +41,7 @@ const CuratedSourceCard: React.FC<{ source: Source; onRemove: () => void; onAdd?
         onClick={!added ? onAdd : undefined}
         disabled={added}
         className={`w-full px-4 py-1 text-sm rounded ${
-          added ? "bg-gray-200 text-gray-500" : "bg-[#F84C39] text-white"
+          added ? "bg-gray-200 text-gray-500" : "bg-[#FF5400] text-white"
         }`}
       >
         {added ? "Added" : "Add to My Library"}

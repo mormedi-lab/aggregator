@@ -230,7 +230,7 @@ const SourceRoundupPage = () => {
             </h1>
             <button
               onClick={() => setIsAddUrlModalOpen(true)}
-              className="bg-[#F84C39] hover:bg-[#F83A27] text-white px-5 py-2 rounded-md text-sm font-medium shadow-md"
+              className="bg-[#FF5400] hover:bg-[#F83A27] text-white px-5 py-2 rounded-md text-sm font-medium shadow-md"
             >
               + Add Source
             </button>
@@ -238,7 +238,7 @@ const SourceRoundupPage = () => {
 
           {loading ? (
             <div className="text-center mt-20">
-              <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#F84C39] border-t-transparent mx-auto"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#FF5400] border-t-transparent mx-auto"></div>
               <p className="mt-4 text-gray-600">Finding the best sources for your research...</p>
             </div>
           ) : error ? (

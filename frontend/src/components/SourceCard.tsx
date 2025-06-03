@@ -59,7 +59,7 @@ const SourceCard: React.FC<{ source: Source; onRemove?: () => void }> = ({
         onClick={handleAdd}
         disabled={added}
         className={`px-4 py-1 text-sm rounded ${
-          added ? "bg-gray-200 text-gray-500" : "bg-[#F84C39] text-white"
+          added ? "bg-gray-200 text-gray-500" : "bg-[#FF5400] text-white"
         }`}
       >
         {added ? "Added" : "Add to My Library"}
