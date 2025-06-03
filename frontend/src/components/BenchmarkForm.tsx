@@ -82,7 +82,7 @@ const BenchmarkForm = () => {
               onClick={() => handleSourceType(type)}
               className={`px-4 py-2 rounded-full border ${
                 formData.source_type === type
-                  ? "bg-[#F84C39] text-white"
+                  ? "bg-[#FF5400] text-white"
                   : "bg-white text-gray-700 border-gray-300"
               }`}
             >
@@ -123,7 +123,7 @@ const BenchmarkForm = () => {
           className={`px-6 py-2 rounded text-white transition ${
             isFormEmpty()
               ? "bg-gray-300 cursor-not-allowed"
-              : "bg-[#F84C39] hover:bg-[#f64024]"
+              : "bg-[#FF5400] hover:bg-[#f64024]"
           }`}
         >
           Start Research

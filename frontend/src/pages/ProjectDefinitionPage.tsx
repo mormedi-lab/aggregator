@@ -94,7 +94,7 @@ function ProjectDefinitionPage() {
 
           <button
             type="submit"
-            className="w-full bg-[#F84C39] text-white py-3 rounded-full hover:bg-[#f64024] transition"
+            className="w-full bg-[#FF5400] text-white py-3 rounded-full hover:bg-[#f64024] transition"
           >
             {projectId ? "Update Project" : "Create Project"}
           </button>

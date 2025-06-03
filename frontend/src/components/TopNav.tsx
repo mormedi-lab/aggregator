@@ -6,8 +6,8 @@ const TopNav = () => {
 
   const isActive = (path: string) =>
     location.pathname.endsWith(path)
-      ? "border-b-[3px] border-[#F84C39] text-[#0F1122] font-semibold"
-      : "text-gray-500 hover:text-[#F84C39]";
+      ? "border-b-[3px] border-[#FF5400] text-[#0F1122] font-semibold"
+      : "text-gray-500 hover:text-[#FF5400]";
 
   return (
     <div className="sticky top-0 z-50 bg-gray-100">

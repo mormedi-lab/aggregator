@@ -21,12 +21,12 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
         <h2 className="text-2xl font-semibold text-gray-900 mb-4">Warning!</h2>
         <p className="text-gray-700 mb-6">
           Are you sure you would like to delete <br />
-          <span className="font-semibold text-[#F84C39]">{projectName}</span>?
+          <span className="font-semibold text-[#FF5400]">{projectName}</span>?
         </p>
         <div className="flex flex-col space-y-3">
           <button
             onClick={onConfirm}
-            className="bg-[#F84C39] hover:bg-red-700 text-white font-semibold py-2 rounded-md shadow-md"
+            className="bg-[#FF5400] hover:bg-red-700 text-white font-semibold py-2 rounded-md shadow-md"
           >
             Yes, Delete
           </button>

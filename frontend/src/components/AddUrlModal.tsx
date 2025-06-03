@@ -75,7 +75,7 @@ const AddUrlModal: React.FC<AddUrlModalProps> = ({ isOpen, onClose, onAddSource 
             </button>
             <button
               type="submit"
-              className={`px-4 py-2 rounded bg-[#F84C39] text-white ${
+              className={`px-4 py-2 rounded bg-[#FF5400] text-white ${
                 isLoading ? 'opacity-70 cursor-not-allowed' : 'hover:bg-[#f64024]'
               }`}
               disabled={isLoading}
