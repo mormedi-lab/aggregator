@@ -10,8 +10,14 @@ class Source(BaseModel):
     summary: str = "No summary available"
     is_trusted: Optional[bool] = False
     date_published: Optional[str] = None
-    
+    image_url: Optional[str] = None
+    is_in_project: Optional[bool] = False
+
 class Sources(BaseModel):
     sources: List[Source]
+
+class AddSourceRequest(BaseModel):
+    project_id: str
+    source_id: str
 
 

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { MoreHorizontal } from "lucide-react";
 import { ResearchSpaceCardProps } from "../types";
 
-export default function ResearchSpaceCard({ space, onClick, onVisit }: ResearchSpaceCardProps) {
+export default function ResearchSpaceCard({ space, onClick, onVisit, selected }: ResearchSpaceCardProps) {
   const [isHovered, setHovered] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -13,7 +13,10 @@ export default function ResearchSpaceCard({ space, onClick, onVisit }: ResearchS
         setHovered(false);
         setMenuOpen(false);
       }}
-      className="relative cursor-pointer rounded-md p-4 border border-[#E0D8CF] bg-[#FAF9F5] hover:bg-white transition-shadow hover:shadow-sm"
+      onClick={() => onClick(space.id)}
+      className={`relative cursor-pointer rounded-md p-4 border border-[#E0D8CF] transition-shadow ${
+        selected ? "bg-white shadow-sm" : "bg-[#FAF9F5] hover:bg-white hover:shadow-sm"
+      }`}
     >
       {/* Hover menu icon */}
       {isHovered && (
@@ -29,7 +32,7 @@ export default function ResearchSpaceCard({ space, onClick, onVisit }: ResearchS
           </button>
         </div>
       )}
-
+  
       {/* Dropdown menu */}
       {menuOpen && (
         <div className="absolute top-9 right-2 bg-white border border-[#E0D8CF] rounded-md shadow-lg z-10 w-32">
@@ -52,14 +55,12 @@ export default function ResearchSpaceCard({ space, onClick, onVisit }: ResearchS
           </button>
         </div>
       )}
-
+  
       {/* Card content */}
-      <div onClick={() => onClick(space.id)}>
-        <div className="font-normal text-[#2D2114] text-base line-clamp-1">
-          {space.query || "[Untitled Research Space]"}
-        </div>
-        <div className="text-xs text-[#827F7F] mt-1">{space.search_type}</div>
+      <div className="font-normal text-[#2D2114] text-base line-clamp-1">
+        {space.query || "[Untitled Research Space]"}
       </div>
+      <div className="text-xs text-[#827F7F] mt-1">{space.search_type}</div>
     </div>
-  );
+  )
 }

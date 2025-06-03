@@ -1,14 +1,29 @@
 import {SourceCardProps } from "../types";
 
 export default function SourceCard({ source, variant = "explore", onAdd }: SourceCardProps) {
+
   return (
     <div className="flex flex-col border border-[#E0D8CF] bg-[#FAF9F5] hover:bg-white rounded-md p-4 shadow-sm transition min-h-[340px]">
       {/* Image placeholder */}
-      <div className="h-32 bg-[#E0D8CF] rounded mb-3" />
+      {source.image_url ? (
+        <img
+          src={source.image_url}
+          alt={source.headline}
+          className="h-32 w-full object-cover rounded mb-3"
+          onError={(e) => (e.currentTarget.style.display = "none")}
+        />
+      ) : null}
 
       <div className="flex flex-col flex-grow">
         <div className="text-xs text-[#666565] mb-1">{source.publisher}</div>
-        <div className="font-semibold text-[#2D2114] mb-1">{source.headline}</div>
+        <a
+          href={source.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="font-semibold text-[#2D2114] mb-1 hover:underline"
+        >
+          {source.headline}
+        </a>
         <div className="text-sm text-[#827F7F] mb-2">{source.summary}</div>
         <div className="text-xs text-[#827F7F]">{source.date_published || "MM-DD-YYYY"}</div>
       </div>

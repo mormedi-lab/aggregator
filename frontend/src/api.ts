@@ -94,10 +94,13 @@ export async function postSourcesToSpace(spaceId: string) {
   return res.json(); // { sources }
 }
 
-export async function fetchSourcesForSpace(spaceId: string) {
-  const res = await fetch(`${API}/space/${spaceId}/sources`);
-  if (!res.ok) throw new Error("Failed to fetch sources for research space");
-  return res.json(); // { sources }
+export async function addSourceToProject(spaceId: string, projectId: string, sourceId: string) {
+  const res = await fetch(`${API}/space/${spaceId}/add_source_to_project`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ project_id: projectId, source_id: sourceId }),
+  });
+  return res.json();
 }
 
 

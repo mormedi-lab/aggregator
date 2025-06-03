@@ -1,6 +1,6 @@
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { fetchResearchSpaceById, postSourcesToSpace, fetchSourcesForSpace } from "../api";
+import { fetchResearchSpaceById, postSourcesToSpace, fetchSourcesForSpace, addSourceToProject } from "../api";
 import { Source, ResearchSpace } from "../types";
 import SourceCard from "../components/SourceCard";
 
@@ -10,6 +10,20 @@ export default function ResearchSpacePage() {
   const [sources, setSources] = useState<Source[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const handleAddSource = async (sourceId: string) => {
+    try {
+      await addSourceToProject(spaceId!,projectId!, sourceId);
+
+      // Refetch sources from backend
+      const data = await fetchSourcesForSpace(spaceId!, projectId!);
+      console.log("🔁 Refetched sources:", data.sources);
+      setSources(data.sources);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+
   useEffect(() => {
     const loadSpaceAndSources = async () => {
       try {
@@ -17,7 +31,7 @@ export default function ResearchSpacePage() {
         setSpace(loadedSpace);
   
         // 1. Try to fetch saved sources first
-        const res = await fetchSourcesForSpace(spaceId!);
+        const res = await fetchSourcesForSpace(spaceId!, projectId!);
         if (res.sources.length > 0) {
           setSources(res.sources);
         } else {
@@ -43,8 +57,8 @@ export default function ResearchSpacePage() {
     );
   }
 
-  const added = sources.filter((s) => s.isInProject);
-  const explore = sources.filter((s) => !s.isInProject);
+  const added = sources.filter((s) => s.is_in_project);
+  const explore = sources.filter((s) => !s.is_in_project);
 
   return (
     <div className="px-6 py-8 bg-[#FAF9F5] min-h-screen">
@@ -71,8 +85,8 @@ export default function ResearchSpacePage() {
             <SourceCard
               key={source.id}
               source={source}
-              variant="added"
-              onAdd={() => {}} // already added
+              variant={source.is_in_project ? "added" : "explore"}
+              onAdd={() => handleAddSource(source.id)}
             />
           ))}
         </div>
@@ -90,8 +104,8 @@ export default function ResearchSpacePage() {
             <SourceCard
               key={source.id}
               source={source}
-              variant="explore"
-              onAdd={() => console.log("TODO: add to project")}
+              variant={source.is_in_project ? "added" : "explore"}
+              onAdd={() => handleAddSource(source.id)}
             />
           ))}
         </div>
