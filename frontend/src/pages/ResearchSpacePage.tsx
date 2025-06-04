@@ -22,7 +22,7 @@ export default function ResearchSpacePage() {
           setSources(res.sources);
         } else {
           // 2. If no saved sources, generate them now
-          const generated = await postSourcesToSpace(spaceId!, loadedSpace.query);
+          const generated = await postSourcesToSpace(spaceId!);
           setSources(generated.sources);
         }
       } catch (err) {
