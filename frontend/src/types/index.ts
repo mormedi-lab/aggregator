@@ -30,6 +30,7 @@ export interface Source {
       search_type: string;
       created_at: string;
     };
+    selected: boolean;
     onClick: (id: string) => void;
     onVisit?: (id: string) => void;
   }
