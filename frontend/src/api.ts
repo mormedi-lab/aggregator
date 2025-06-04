@@ -85,7 +85,7 @@ export async function fetchResearchSpaceById(projectId: string, spaceId: string)
   return await res.json();
 }
 
-export async function postSourcesToSpace(spaceId: string, query: string) {
+export async function postSourcesToSpace(spaceId: string) {
   const res = await fetch(`${API}/space/${spaceId}/find_sources`, {
     method: "POST",
   });

@@ -1,4 +1,4 @@
-import { Source, SourceCardProps } from "../types";
+import {SourceCardProps } from "../types";
 
 export default function SourceCard({ source, variant = "explore", onAdd }: SourceCardProps) {
   return (

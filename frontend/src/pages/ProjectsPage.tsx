@@ -47,37 +47,20 @@ function ProjectsPage() {
     navigate(`/project/${project.id}/dashboard`);
   };
 
-  // Fetch all projects and check for benchmark data
+  // Fetch all projects 
   useEffect(() => {
     const loadProjects = async () => {
       try {
         const data = await fetchProjects();
         const cleaned = data.filter((p: any) => p.id);
-        
-        // Check benchmark status for all projects
-        const projectsWithStatus = await Promise.all(
-          cleaned.map(async (project: Project) => {
-            try {
-              const benchmarkData = await fetchBenchmark(project.id);
-              return {
-                ...project,
-                hasBenchmark: benchmarkData && Object.keys(benchmarkData).length > 0 && benchmarkData.objective
-              };
-            } catch (err) {
-              console.error(`Error checking benchmark for project ${project.id}:`, err);
-              return { ...project, hasBenchmark: false };
-            }
-          })
-        );
-        
-        setProjects(projectsWithStatus);
+        setProjects(cleaned);
       } catch (err) {
         console.error('Error loading projects:', err);
       } finally {
         setLoading(false);
       }
     };
-    
+  
     loadProjects();
   }, []);
   
