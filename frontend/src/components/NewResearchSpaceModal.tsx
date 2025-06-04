@@ -2,12 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { X } from "lucide-react";
 import { createResearchSpace } from "../api";
-
-interface NewResearchSpaceModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  projectId: string;
-}
+import { NewResearchSpaceModalProps } from "../types";
 
 export default function NewResearchSpaceModal({ isOpen, onClose, projectId }: NewResearchSpaceModalProps) {
   const navigate = useNavigate();
@@ -26,11 +21,11 @@ export default function NewResearchSpaceModal({ isOpen, onClose, projectId }: Ne
     try {
       const { id: spaceId } = await createResearchSpace(projectId, query, searchType);
       resetAndClose();
-      navigate(`/project/${projectId}/space/${spaceId}/benchmark`);
+      navigate(`/project/${projectId}/space/${spaceId}`);
     } catch (err) {
       console.error("Failed to create research space", err);
     }
-  };
+  };  
 
   if (!isOpen) return null;
 

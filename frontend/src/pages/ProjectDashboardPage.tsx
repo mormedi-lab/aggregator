@@ -79,7 +79,8 @@ export default function ProjectDashboardPage() {
                     <ResearchSpaceCard
                     key={space.id}
                     space={space}
-                    onClick={(id) => navigate(`/project/${projectId}/space/${id}/benchmark`)}
+                    onClick={() => {}} //THIS WILL LATER BE USED TO FILTER SOURCES IN THE CHAT
+                    onVisit={(id) => navigate(`/project/${projectId}/space/${id}`)}
                     />
                 ))}
             </div>
@@ -101,15 +102,9 @@ export default function ProjectDashboardPage() {
           <div className="space-y-4">
             {/* Example card */}
             <div className="border border-[#E0D8CF] bg-white rounded-md p-4 shadow-sm">
-              <div className="text-xs text-[#666565]">Publisher</div>
-              <div className="font-medium text-[#2D2114]">Headline</div>
               <div className="text-sm text-[#827F7F] mt-1">
-                AI-generated summary of what value this source brings to the query
+                Filtered source cards will appear here
               </div>
-              <div className="text-xs text-[#827F7F] mt-1">MM-DD-YYYY</div>
-              <button className="mt-2 text-xs bg-[#E0D8CF] text-[#2D2114] px-3 py-1 rounded">
-                Added
-              </button>
             </div>
           </div>
         </div>

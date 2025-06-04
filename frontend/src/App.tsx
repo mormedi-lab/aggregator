@@ -2,11 +2,8 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import AppLayout from "./layout/AppLayout";
 import LoginPage from "./pages/LoginPage";
 import ProjectsPage from "./pages/ProjectsPage";
-import ProjectDefinitionPage from "./pages/ProjectDefinitionPage";
 import ProjectDashboardPage from "./pages/ProjectDashboardPage";
-import SourceRoundupPage from "./pages/SourceRoundupPage";
-import LibraryPage from "./pages/LibraryPage";
-import AppLayoutWithTopNav from "./layout/AppLayoutWithTopNav";
+import ResearchSpacePage from "./pages/ResearchSpacePage";
 
 function App() {
   return (
@@ -23,24 +20,6 @@ function App() {
       />
 
       <Route
-        path="/new"
-        element={
-          <AppLayout>
-            <ProjectDefinitionPage />
-          </AppLayout>
-        }
-      />
-
-      <Route
-        path="/project/:id"
-        element={
-          <AppLayout>
-            <ProjectDefinitionPage />
-          </AppLayout>
-        }
-      />
-
-      <Route
         path="/project/:id/dashboard"
         element={
           <AppLayout>
@@ -50,22 +29,13 @@ function App() {
       />
 
       <Route
-        path="/project/:id/sources"
+        path="/project/:id/space/:spaceId"
         element={
           <AppLayout>
-            <SourceRoundupPage   />
+            <ResearchSpacePage />
           </AppLayout>
         }
       />
-
-    <Route
-      path="/project/:id/library"
-      element={
-        <AppLayout>
-          <LibraryPage />
-        </AppLayout>
-      }
-    />
 
       {/* Fallback redirect */}
       <Route path="*" element={<Navigate to="/projects" replace />} />

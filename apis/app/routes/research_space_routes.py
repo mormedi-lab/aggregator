@@ -5,9 +5,9 @@ from fastapi.responses import JSONResponse
 
 from app.config import SessionNeo4j
 from app.models.research_space import CreateResearchSpaceRequest, ResearchSpaceResponse
-
 from app.services.neo4j_research_space_service import fetch_research_spaces_for_project
 from app.services.neo4j_research_space_service import create_research_space_node
+from app.services.neo4j_research_space_service import fetch_single_research_space_by_id   
 
 router = APIRouter()
 
@@ -27,3 +27,11 @@ def create_research_space(session: SessionNeo4j, project_id: str, body: CreateRe
 @router.get("/project/{project_id}/spaces", response_model=list[ResearchSpaceResponse])
 def get_research_spaces(session: SessionNeo4j, project_id: str):
     return session.read_transaction(fetch_research_spaces_for_project, project_id)
+
+
+@router.get("/project/{project_id}/spaces/{space_id}", response_model=ResearchSpaceResponse)
+def get_research_space(session: SessionNeo4j, project_id: str, space_id: str):
+    space = session.read_transaction(fetch_single_research_space_by_id, space_id)
+    if space is None:
+        raise HTTPException(status_code=404, detail="Research space not found")
+    return space

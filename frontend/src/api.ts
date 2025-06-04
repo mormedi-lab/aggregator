@@ -44,48 +44,6 @@ export async function fetchProjectById(id: string) {
   return res.json();
 }
 
-
-export async function updateProject(project: {
-  id: string;
-  title: string;
-  industry: string;
-  objective: string;
-}) {
-  const res = await fetch("${API}/project", {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(project),
-  });
-  if (!res.ok) throw new Error("Failed to update project");
-  return res.json();
-}
-
-export async function saveBenchmark(data: {
-  project_id: string;
-  objective: string;
-  companies: string;
-  industries: string;
-  geographies: string;
-  timeframe: string;
-  source_type: string;
-}) {
-  const res = await fetch(`${API}/benchmark`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-  });
-
-  if (!res.ok) throw new Error("Failed to save benchmark");
-  return res.json();
-}
-
-export async function fetchBenchmark(projectId: string) {
-  const res = await fetch(`${API}/benchmark?project_id=${projectId}`);
-  if (!res.ok) throw new Error("Failed to fetch benchmark");
-  return res.json();
-}
-
-
 export async function generatePrompt(projectId: string) {
   const res = await fetch(`${API}/generate_prompt?project_id=${projectId}`);
   if (!res.ok) throw new Error("Failed to generate prompt");
@@ -95,68 +53,6 @@ export async function generatePrompt(projectId: string) {
 export async function findSources(prompt: string) {
   const res = await fetch(`${API}/find_sources?search_prompt=${encodeURIComponent(prompt)}`);
   if (!res.ok) throw new Error("Failed to find sources");
-}
-
-export async function postAndSaveSources(projectId: string, prompt: string) {
-  const res = await fetch(`${API}/find_sources`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      project_id: projectId,
-      search_prompt: prompt,
-    }),
-  });
-
-  if (!res.ok) throw new Error("Failed to save sources");
-  return res.json(); // returns { sources }
-}
-
-export async function getSavedSources(projectId: string) {
-  const res = await fetch(`${API}/projects/${projectId}/sources`);
-  if (!res.ok) throw new Error("Failed to fetch saved sources");
-  const data = await res.json();
-  return data.sources;
-}
-
-export async function addSourceToLibrary(projectId: string, sourceId: string) {
-  const res = await fetch(`${API}/project/${projectId}/library/add`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ source_id: sourceId })
-  });
-
-  if (!res.ok) throw new Error("Failed to add source to library");
-  const data = await res.json();
-  return data;
-}
-
-export async function getProjectLibrary(projectId: string) {
-  const res = await fetch(`${API}/project/${projectId}/library`);
-  if (!res.ok) throw new Error("Failed to load library");
-  const data = await res.json();
-  return data.sources;
-}
-
-export async function removeSourceFromLibrary(projectId: string, sourceId: string) {
-  const res = await fetch(`${API}/project/${projectId}/library/remove`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ source_id: sourceId })
-  });
-
-  if (!res.ok) throw new Error("Failed to remove source from library");
-  const data = await res.json();
-  return data;
-}
-
-export async function fetchMetadataFromUrl(url: string) {
-  const res = await fetch(`${API}/metadata?url=${encodeURIComponent(url)}`);
-  if (!res.ok) throw new Error("Failed to fetch metadata");
-  return res.json();
 }
 
 export async function createResearchSpace(projectId: string, query: string, searchType: string) {
@@ -183,6 +79,26 @@ export async function fetchResearchSpaces(projectId: string) {
   return Array.isArray(data) ? data : [];
 }
 
+export async function fetchResearchSpaceById(projectId: string, spaceId: string) {
+  const res = await fetch(`${API}/project/${projectId}/spaces/${spaceId}`);
+  if (!res.ok) throw new Error("Failed to fetch research space");
+  return await res.json();
+}
+
+export async function postSourcesToSpace(spaceId: string, query: string) {
+  const res = await fetch(`${API}/space/${spaceId}/find_sources`, {
+    method: "POST",
+  });
+
+  if (!res.ok) throw new Error("Failed to find and save sources");
+  return res.json(); // { sources }
+}
+
+export async function fetchSourcesForSpace(spaceId: string) {
+  const res = await fetch(`${API}/space/${spaceId}/sources`);
+  if (!res.ok) throw new Error("Failed to fetch sources for research space");
+  return res.json(); // { sources }
+}
 
 
 

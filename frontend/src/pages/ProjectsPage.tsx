@@ -1,20 +1,12 @@
 import { useEffect, useState } from "react";
-import { fetchProjects, deleteProject, fetchBenchmark } from "../api";
+import { fetchProjects, deleteProject } from "../api";
 import { useNavigate } from "react-router-dom";
 import DeleteConfirmationModal from '../components/DeleteConfirmationModal';
 import ProjectCard from '../components/ProjectCard';
 import SearchBar from "../components/SearchBar";
 import SortBy from "../components/SortBy";
 import NewProjectModal from "../components/NewProjectModal";
-
-interface Project {
-  id: string;
-  title: string;
-  industry: string;
-  objective: string;
-  last_accessed: string;
-  hasBenchmark?: boolean;
-}
+import { Project } from "../types";
 
 function ProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([]);

@@ -8,8 +8,9 @@ class Source(BaseModel):
     headline: str
     url: str
     summary: str = "No summary available"
-    is_curated: Optional[bool] = False
-
+    is_trusted: Optional[bool] = False
+    date_published: Optional[str] = None
+    
 class FindSourcesRequest(BaseModel):
     project_id: str
     search_prompt: str
