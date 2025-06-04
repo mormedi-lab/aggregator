@@ -6,7 +6,7 @@ from fastapi import APIRouter, status, Request, HTTPException
 from fastapi.responses import JSONResponse
 
 from app.config import SessionNeo4j, load_conf
-from app.models.source import Source, Sources
+from app.models.source import Source, Sources, AddSourceRequest
 
 from app.agents.find_sources_agent import find_sources_from_prompt
 from app.services.neo4j_source_service import create_sources_for_space, fetch_sources_for_space
@@ -16,8 +16,8 @@ router = APIRouter()
 openai.api_key = load_conf("OPENAI_API_KEY")
 
 @router.get("/space/{space_id}/sources", response_model=Sources)
-def get_sources_for_space(session: SessionNeo4j, space_id: str) -> Sources:
-    sources = session.read_transaction(fetch_sources_for_space, space_id)
+def get_sources_for_space(session: SessionNeo4j, space_id: str, project_id: str) -> Sources:
+    sources = session.read_transaction(fetch_sources_for_space, space_id, project_id)
     return Sources(sources=sources)
 
 @router.post("/space/{space_id}/find_sources", response_model=Sources)
@@ -49,4 +49,21 @@ async def find_sources_for_space(session: SessionNeo4j, space_id: str) -> Source
 
     return Sources(sources=sources)
 
+#TODO:separate neo4j function from this
 
+from fastapi import Path
+
+@router.post("/space/{space_id}/add_source_to_project")
+async def add_source_to_project(session: SessionNeo4j, space_id: str, request: AddSourceRequest) -> dict:
+    project_id = request.project_id
+    source_id = request.source_id
+
+    try:
+        query = """
+        MATCH (p:Project {id: $project_id}), (s:Source {id: $source_id})
+        MERGE (p)-[:INCLUDES]->(s)
+        """
+        session.run(query, {"project_id": project_id, "source_id": source_id})
+        return {"message": "Source added to project", "source_id": source_id}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Internal server error")

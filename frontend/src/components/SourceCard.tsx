@@ -1,6 +1,7 @@
 import {SourceCardProps } from "../types";
 
 export default function SourceCard({ source, variant = "explore", onAdd }: SourceCardProps) {
+  
   return (
     <div className="flex flex-col border border-[#E0D8CF] bg-[#FAF9F5] hover:bg-white rounded-md p-4 shadow-sm transition min-h-[340px]">
       {/* Image placeholder */}

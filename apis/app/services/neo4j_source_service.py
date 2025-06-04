@@ -29,13 +29,20 @@ def create_sources_for_space(tx: Transaction, space_id: str, sources: list[Sourc
             date_published=source.date_published or "1970-01-01"
 )
 
-def fetch_sources_for_space(tx: Transaction, space_id: str):
+def fetch_sources_for_space(tx: Transaction, space_id: str, project_id: str):
     query = """
     MATCH (s:ResearchSpace {id: $space_id})-[:HAS_SOURCE]->(src:Source)
-    RETURN src.id AS id, src.publisher AS publisher, src.headline AS headline,
-           src.url AS url, src.summary AS summary, src.is_trusted AS is_trusted,
-           src.date_published AS date_published
+    OPTIONAL MATCH (p:Project {id: $project_id})-[:INCLUDES]->(src)
+    RETURN 
+        src.id AS id,
+        src.publisher AS publisher,
+        src.headline AS headline,
+        src.url AS url,
+        src.summary AS summary,
+        src.is_trusted AS is_trusted,
+        src.date_published AS date_published,
+        COUNT(p) > 0 AS is_in_project
     ORDER BY src.date_published DESC
     """
-    result = tx.run(query, {"space_id": space_id})
+    result = tx.run(query, {"space_id": space_id, "project_id": project_id})
     return [record.data() for record in result]
