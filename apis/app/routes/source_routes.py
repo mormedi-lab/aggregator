@@ -5,23 +5,23 @@ import openai
 from fastapi import APIRouter, status, Request
 from fastapi.responses import JSONResponse
 
+from app.config import SessionNeo4j, load_conf
+from app.models.source import Source, Sources
+
 from app.agents.find_sources_agent import find_sources_from_prompt
 from app.services.neo4j_source_service import create_sources_for_space, fetch_sources_for_space
 from app.services.neo4j_research_space_service import fetch_single_research_space_by_id
-from app.config import SessionNeo4j, load_conf
-from app.models.source import Source, FindSourcesRequest, AddToLibraryRequest, RemoveFromLibraryRequest, CuratedSourceRequest, Sources
-from app.models.response import StatusResponse
 
 router = APIRouter()
 openai.api_key = load_conf("OPENAI_API_KEY")
 
 @router.get("/space/{space_id}/sources", response_model=Sources)
-def get_sources_for_space(session: SessionNeo4j, space_id: str):
+def get_sources_for_space(session: SessionNeo4j, space_id: str) -> Sources:
     sources = session.read_transaction(fetch_sources_for_space, space_id)
     return Sources(sources=sources)
 
 @router.post("/space/{space_id}/find_sources", response_model=Sources)
-async def find_sources_for_space(session: SessionNeo4j, space_id: str):
+async def find_sources_for_space(session: SessionNeo4j, space_id: str) -> Sources:
     space = session.read_transaction(fetch_single_research_space_by_id, space_id)
     if not space:
         raise HTTPException(status_code=404, detail="Research space not found")

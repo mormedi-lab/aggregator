@@ -11,19 +11,7 @@ class Source(BaseModel):
     is_trusted: Optional[bool] = False
     date_published: Optional[str] = None
     
-class FindSourcesRequest(BaseModel):
-    project_id: str
-    search_prompt: str
-
-class AddToLibraryRequest(BaseModel):
-    source_id: str
-
-class RemoveFromLibraryRequest(BaseModel):
-    source_id: str
-
 class Sources(BaseModel):
     sources: List[Source]
 
-class CuratedSourceRequest(BaseModel):
-    source: Source
 
