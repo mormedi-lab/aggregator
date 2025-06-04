@@ -87,15 +87,3 @@ def delete_project(session: SessionNeo4j, id: str = Query(...))-> ProjectStatusR
         DETACH DELETE p, s
     """, id=id)
     return ProjectStatusResponse(status="deleted")
-
-
-@router.put("/project", response_model=ProjectStatusResponse)
-def update_project(session: SessionNeo4j, data: ProjectUpdate = Body(...))-> ProjectStatusResponse:
-    session.run("""
-        MATCH (p:Project {id: $id})
-        SET p.title = $title,
-            p.industry = $industry,
-            p.objective = $objective,
-            p.last_accessed = date()
-    """, id=data.id, title=data.title, industry=data.industry, objective=data.objective)
-    return ProjectStatusResponse(status="updated")

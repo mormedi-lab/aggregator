@@ -2,7 +2,7 @@ import uuid
 from typing import List
 
 import openai
-from fastapi import APIRouter, status, Request
+from fastapi import APIRouter, status, Request, HTTPException
 from fastapi.responses import JSONResponse
 
 from app.config import SessionNeo4j, load_conf
