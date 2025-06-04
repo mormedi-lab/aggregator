@@ -1,100 +1,41 @@
+import uuid
 from app.models.source import Source
-from neo4j import Session
+from neo4j import Session, Transaction
 from typing import List
 
-def create_source_node(tx: Session, project_id: str, source: Source) -> None:
-    tx.run(
-        """
-        MATCH (p:Project {id: $project_id})
-        CREATE (s:Source {
-            id: randomUUID(),
-            publisher: $publisher,
-            headline: $headline,
-            url: $url,
-            summary: $summary,
-            is_curated: $is_curated
-        })
-        CREATE (p)-[:HAS_SOURCE]->(s)
-        """,
-        project_id=project_id,
-        publisher=source.publisher,
-        headline=source.headline,
-        url=source.url,
-        summary=source.summary,
-        is_curated=source.is_curated
-    )
+def create_sources_for_space(tx: Transaction, space_id: str, sources: list[Source]) -> None:
+    for source in sources:
+        tx.run(
+            """
+            MATCH (s:ResearchSpace {id: $space_id})
+            CREATE (src:Source {
+                id: $id,
+                publisher: $publisher,
+                headline: $headline,
+                url: $url,
+                summary: $summary,
+                is_trusted: $is_trusted,
+                date_published: $date_published
+            })
+            MERGE (s)-[:HAS_SOURCE]->(src)
+            """,
+            space_id=space_id,
+            id=source.id or str(uuid.uuid4()),
+            publisher=source.publisher,
+            headline=source.headline,
+            url=source.url,
+            summary=source.summary or "No summary available",
+            is_trusted=source.is_trusted or False,
+            date_published=source.date_published or "1970-01-01"
+)
 
-def fetch_sources_for_project(tx: Session, project_id: str) -> List[dict]:
-    result = tx.run(
-        """
-        MATCH (p:Project {id: $project_id})-[:HAS_SOURCE]->(s:Source)
-        RETURN 
-            s.id AS id, 
-            s.publisher AS publisher,
-            s.headline AS headline, 
-            s.url AS url, 
-            coalesce(s.summary, "") AS summary,
-            coalesce(s.is_curated, false) AS is_curated
-        """,
-        project_id=project_id
-    )
+def fetch_sources_for_space(tx: Transaction, space_id: str):
+    query = """
+    MATCH (s:ResearchSpace {id: $space_id})-[:HAS_SOURCE]->(src:Source)
+    RETURN src.id AS id, src.publisher AS publisher, src.headline AS headline,
+           src.url AS url, src.summary AS summary, src.is_trusted AS is_trusted,
+           src.date_published AS date_published
+    ORDER BY src.date_published DESC
+    """
+    result = tx.run(query, {"space_id": space_id})
     return [record.data() for record in result]
-
-def link_source_to_library(tx: Session, project_id: str, source_id: str) -> None:
-    tx.run(
-        """
-        MATCH (p:Project {id: $project_id}), (s:Source {id: $source_id})
-        MERGE (p)-[:IS_IN_LIBRARY]->(s)
-        """,
-        project_id=project_id,
-        source_id=source_id
-    )
-
-def fetch_project_library(tx: Session, project_id: str) -> List[dict]:
-    result = tx.run(
-        """
-        MATCH (p:Project {id: $project_id})-[:IS_IN_LIBRARY]->(s:Source)
-        RETURN 
-            s.id AS id, 
-            s.headline AS headline,
-            s.publisher AS publisher,
-            s.url AS url,
-            coalesce(s.summary, "") AS summary,
-            coalesce(s.is_curated, false) AS is_curated
-        """,
-        project_id=project_id
-    )
-    return [record.data() for record in result]
-
-def unlink_source_from_library(tx: Session, project_id: str, source_id: str) -> None:
-    tx.run(
-        """
-        MATCH (p:Project {id: $project_id})-[r:IS_IN_LIBRARY]->(s:Source {id: $source_id})
-        DELETE r
-        """,
-        project_id=project_id,
-        source_id=source_id
-    )
-
-def create_curated_source_node_and_link(tx: Session, project_id: str, source_id: str, source: dict) -> None:
-    tx.run(
-        """
-        MATCH (p:Project {id: $project_id})
-        CREATE (s:Source {
-            id: $source_id,
-            publisher: $publisher,
-            headline: $headline,
-            url: $url,
-            summary: $summary,
-            is_curated: true
-        })
-        CREATE (p)-[:HAS_SOURCE]->(s)
-        CREATE (p)-[:IS_IN_LIBRARY]->(s)
-        """,
-        project_id=project_id,
-        source_id=source_id,
-        publisher=source.get("publisher", "unknown"),
-        headline=source.get("headline", "Untitled"),
-        url=source.get("url", ""),
-        summary=source.get("summary", "Invalid source")
-    )
