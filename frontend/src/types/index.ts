@@ -13,6 +13,7 @@ export interface Source {
     url: string;
     date_published: string;
     summary: string;
+    image_url: string;
     is_trusted?: boolean;
     is_in_project?: boolean;
   }
