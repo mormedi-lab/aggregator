@@ -6,6 +6,7 @@ import { fetchResearchSpaces } from "../api";
 import ResearchSpaceCard from "../components/ResearchSpaceCard";
 import { Source } from "../types";
 import SourceCard from "../components/SourceCard";
+import ChatWithSources from "../components/ChatWithSources";
 
 export default function ProjectDashboardPage() {
   const { id } = useParams<{ id: string }>();
@@ -126,20 +127,25 @@ export default function ProjectDashboardPage() {
       <div>
         <h2 className="text-lg font-medium text-[#2D2114]">Source Library</h2>
         <hr className="border-t border-[#E0D8CF] mb-4" />
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Left: Chat box placeholder */}
-          <div className="border border-[#E0D8CF] rounded-md bg-white p-4 min-h-[200px]">
-            <p className="text-sm text-[#827F7F]">[Chat box coming soon]</p>
+        <div className="flex gap-4 mt-4">
+          {/* Chat Panel */}
+          <div className="w-1/2 h-[400px] flex flex-col justify-between rounded p-3 bg-[#FAF9F5]">
+            <ChatWithSources selectedSources={selectedSources} />
           </div>
-  
-          {/* Right: Saved sources placeholder */}
-          <div className="space-y-4">
+
+          {/* Scrollable Source Card Panel */}
+          <div className="w-1/2 h-[400px] overflow-y-auto  rounded p-3 bg-[#FAF9F5]">
             {selectedSources.length === 0 ? (
-              <div className="text-sm text-[#827F7F] mt-1">No sources selected.</div>
+              <p className="text-sm text-[#827F7F]">No sources selected.</p>
             ) : (
-              <div className="grid grid-cols-1 gap-3">
+              <div className="flex flex-col gap-3">
                 {selectedSources.map((source) => (
-                  <SourceCard key={source.id} source={source} variant="added" onAdd={() => {}} />
+                  <SourceCard
+                    key={source.id}
+                    source={source}
+                    variant="added"
+                    onAdd={() => {}}
+                  />
                 ))}
               </div>
             )}

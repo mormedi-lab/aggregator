@@ -1,4 +1,5 @@
 //frontend api client for calling backend endpoints using fetch()
+import { Source } from "./types";
 
 export const API = import.meta.env.VITE_API_URL || "http://localhost:8000"; // fallback for dev
 
@@ -109,10 +110,19 @@ export async function addSourceToProject(spaceId: string, projectId: string, sou
   return res.json();
 }
 
+export async function askSources(query: string, sources: Source[]) {
+  const res = await fetch(`${API}/ask_sources`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ query, sources }),
+  });
 
+  if (!res.ok) {
+    throw new Error("Failed to fetch answer");
+  }
 
-
-
+  return res.json();
+}
 
 
 

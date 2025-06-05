@@ -9,17 +9,18 @@ export default function ResearchSpacePage() {
   const [space, setSpace] = useState<ResearchSpace | null>(null);
   const [sources, setSources] = useState<Source[]>([]);
   const [loading, setLoading] = useState(true);
+  const [addedSources, setAddedSources] = useState<Set<string>>(new Set());
 
   const handleAddSource = async (sourceId: string) => {
     try {
       await addSourceToProject(spaceId!,projectId!, sourceId);
   
       // Refetch sources from backend
-      const data = await fetchSourcesForSpace(spaceId!, projectId!);
-      console.log("🔁 Refetched sources:", data.sources); 
-      setSources(data.sources);
+      const updatedSources = await fetchSourcesForSpace(spaceId!, projectId!);
+      setSources(updatedSources.sources);
+      setAddedSources(new Set(updatedSources.sources.filter((s: Source) => s.is_in_project).map((s: Source) => s.id)));
     } catch (err) {
-      console.error(err);
+      console.error("Error adding source to project:", err);
     }
   };
     
