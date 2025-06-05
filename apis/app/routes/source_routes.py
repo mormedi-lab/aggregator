@@ -40,6 +40,7 @@ async def find_sources_for_space(session: SessionNeo4j, space_id: str) -> Source
             url=s.url,
             summary=s.summary or "",
             is_curated=False,
+            image_url=s.image_url or None
         )
         for s in sources
         if s.publisher and s.headline and s.url
