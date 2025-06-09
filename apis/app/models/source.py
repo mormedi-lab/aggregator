@@ -8,21 +8,10 @@ class Source(BaseModel):
     headline: str
     url: str
     summary: str = "No summary available"
-    is_curated: Optional[bool] = False
-
-class FindSourcesRequest(BaseModel):
-    project_id: str
-    search_prompt: str
-
-class AddToLibraryRequest(BaseModel):
-    source_id: str
-
-class RemoveFromLibraryRequest(BaseModel):
-    source_id: str
-
+    is_trusted: Optional[bool] = False
+    date_published: Optional[str] = None
+    
 class Sources(BaseModel):
     sources: List[Source]
 
-class CuratedSourceRequest(BaseModel):
-    source: Source
 

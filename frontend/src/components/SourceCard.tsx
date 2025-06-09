@@ -1,71 +1,31 @@
-// components/SourceCard.tsx
-import React, { useState } from "react";
-import { addSourceToLibrary } from "../api";
-import { useParams } from "react-router-dom";
+import {SourceCardProps } from "../types";
 
-interface Source {
-  id: string;
-  headline: string;
-  publisher: string;
-  url: string;
-  date_published: string;
-  summary: string;
-  is_curated?: boolean; 
-  isInLibrary?: boolean;
-}
-
-const SourceCard: React.FC<{ source: Source; onRemove?: () => void }> = ({
-  source,
-  onRemove,
-}) => {
-  const { id: projectId } = useParams();
-  const [added, setAdded] = useState(source.isInLibrary ?? false);
-
-  const handleAdd = async () => {
-    try {
-      console.log("Sending to library:", { projectId, sourceId: source.id });
-      await addSourceToLibrary(projectId!, source.id);
-      setAdded(true);
-    } catch (err) {
-      console.error("Failed to add to library:", err);
-    }
-  };
-
+export default function SourceCard({ source, variant = "explore", onAdd }: SourceCardProps) {
   return (
-    <div className="border border-gray-200 rounded-lg p-4 shadow-sm relative flex flex-col justify-between h-full">
-      {onRemove && (
-        <button
-          onClick={onRemove}
-          className="absolute top-2 right-3 text-gray-400 hover:text-red-500"
-        >
-          ✕
-        </button>
-      )}
-      <div className="flex-grow">
-        <div className="text-sm text-gray-500 mb-1">{source.publisher}</div>
-        <div className="font-semibold text-lg text-gray-800 mb-2">
-          <a href={source.url} target="_blank" rel="noopener noreferrer" className="hover:underline">
-            {source.headline}
-          </a>
-        </div>
+    <div className="flex flex-col border border-[#E0D8CF] bg-[#FAF9F5] hover:bg-white rounded-md p-4 shadow-sm transition min-h-[340px]">
+      {/* Image placeholder */}
+      <div className="h-32 bg-[#E0D8CF] rounded mb-3" />
 
-        <div className="text-sm text-gray-600 mb-3">
-          {source.summary || "Summary will appear here soon."}
-        </div>
-
-        <div className="text-xs text-gray-400 mb-2">{source.date_published}</div>
+      <div className="flex flex-col flex-grow">
+        <div className="text-xs text-[#666565] mb-1">{source.publisher}</div>
+        <div className="font-semibold text-[#2D2114] mb-1">{source.headline}</div>
+        <div className="text-sm text-[#827F7F] mb-2">{source.summary}</div>
+        <div className="text-xs text-[#827F7F]">{source.date_published || "MM-DD-YYYY"}</div>
       </div>
-      <button
-        onClick={handleAdd}
-        disabled={added}
-        className={`px-4 py-1 text-sm rounded ${
-          added ? "bg-gray-200 text-gray-500" : "bg-[#FF5400] text-white"
-        }`}
-      >
-        {added ? "Added" : "Add to My Library"}
-      </button>
+
+      {/* Button pinned to bottom */}
+      <div className="mt-auto pt-4">
+        {variant === "added" ? (
+          <span className="text-xs px-3 py-1 rounded bg-[#E0D8CF] text-[#2D2114] inline-block">Added</span>
+        ) : (
+          <button
+            onClick={onAdd}
+            className="text-xs bg-[#FF5400] text-white px-4 py-1 rounded shadow-sm hover:bg-[#ff6a1a]"
+          >
+            Add to My Project
+          </button>
+        )}
+      </div>
     </div>
   );
-};
-
-export default SourceCard;
+}

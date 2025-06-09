@@ -40,7 +40,7 @@ export default function NewProjectModal({ isOpen, onClose }: NewProjectModalProp
       const industry = selectedIndustries.join(", ");
       const projectId = await createProject({ title, industry, objective });
       onClose();
-      navigate(`/project/${projectId}/benchmark`);
+      navigate(`/project/${projectId}/dashboard`);
     } catch (err) {
       console.error("Failed to create project", err);
     }
