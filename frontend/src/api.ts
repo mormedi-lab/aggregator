@@ -94,6 +94,12 @@ export async function postSourcesToSpace(spaceId: string) {
   return res.json(); // { sources }
 }
 
+export async function fetchSourcesForSpace(spaceId: string, projectId: string) {
+  const res = await fetch(`${API}/space/${spaceId}/sources?project_id=${projectId}`);
+  if (!res.ok) throw new Error("Failed to fetch sources");
+  return await res.json();
+}
+
 export async function addSourceToProject(spaceId: string, projectId: string, sourceId: string) {
   const res = await fetch(`${API}/space/${spaceId}/add_source_to_project`, {
     method: "POST",
