@@ -7,23 +7,18 @@ from tests.MockSession import MockSession, MockTransaction
 @pytest.mark.asyncio
 async def test_create_research_space():
     # 1. Mock write_transaction to return a specific research space dict
-    class CustomTransaction(MockTransaction):
-        def run(self, query, parameters=None):
-            return {
-                "id": parameters.get("id"),
-                "query": parameters.get("query"),
-                "search_type": parameters.get("search_type"),
-                "created_at": parameters.get("created_at"),
-            }
+    def mock_create_research_space(tx, project_id, space):
+        return {
+            "id": space.id,
+            "query": space.query,
+            "search_type": space.search_type,
+            "created_at": space.created_at,
+        }
 
-    class CustomSession(MockSession):
-        def write_transaction(self, func, *args, **kwargs):
-            return func(CustomTransaction(), *args, **kwargs)
-
-    async def override_get_session():
-        yield CustomSession()
-
-    app.dependency_overrides[get_neo4j_session] = override_get_session
+    app.dependency_overrides[get_neo4j_session] = lambda: MockSession(
+        return_value=None  # not used for write, but required
+    )
+    MockSession.write_transaction = lambda self, func, *args, **kwargs: mock_create_research_space(MockTransaction(), *args, **kwargs)
 
     # 2. Payload
     payload = {

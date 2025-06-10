@@ -6,7 +6,7 @@ from tests.MockSession import MockSession, MockTransaction
 
 @pytest.mark.asyncio
 async def test_add_source_to_project_success():
-    class CustomTransaction(MockTransaction):
+    class VerifyingTransaction(MockTransaction):
         def run(self, query, parameters=None):
             assert "MATCH (p:Project" in query
             assert parameters["project_id"] == "proj-123"
@@ -14,15 +14,9 @@ async def test_add_source_to_project_success():
             print("✅ CustomTransaction.run called")
             return None
 
-    class CustomSession(MockSession):
-        def write_transaction(self, func, *args, **kwargs):
-            return func(CustomTransaction(), *args, **kwargs)
-
     # ✅ this is key: async generator override
-    async def override_get_session():
-        yield CustomSession()
-
-    app.dependency_overrides[get_neo4j_session] = override_get_session
+    app.dependency_overrides[get_neo4j_session] = lambda: MockSession()
+    MockSession.write_transaction = lambda self, func, *args, **kwargs: func(VerifyingTransaction(), *args, **kwargs)
 
     payload = {
         "project_id": "proj-123",

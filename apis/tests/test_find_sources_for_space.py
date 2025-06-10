@@ -36,22 +36,15 @@ async def test_find_sources_returns_3_realistic_cards(mock_runner_run):
     """
 
     # 2. Custom mock session that returns a research space
-    class CustomSession(MockSession):
-        def read_transaction(self, func, *args, **kwargs):
-            return {
-                "id": "test-space-id",
-                "query": "best cars for dogs",
-                "search_type": "explore",
-                "created_at": "2024-06-01T00:00:00Z"
-            }
-
-        def write_transaction(self, func, *args, **kwargs):
-            return func(MockTransaction(), *args, **kwargs)
-
-    async def override_get_neo4j_session():
-        yield CustomSession()
-
-    app.dependency_overrides[get_neo4j_session] = override_get_neo4j_session
+    app.dependency_overrides[get_neo4j_session] = lambda: MockSession(
+        return_value={
+            "id": "test-space-id",
+            "query": "best cars for dogs",
+            "search_type": "explore",
+            "created_at": "2024-06-01T00:00:00Z"
+        }
+    )
+    MockSession.write_transaction = lambda self, func, *args, **kwargs: func(MockTransaction(), *args, **kwargs)
 
     # 3. Run request
     async with AsyncClient(
