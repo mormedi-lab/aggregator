@@ -21,15 +21,7 @@ async def test_get_research_spaces():
             "created_at": "2025-06-03T00:00:00Z"
         }
     ]
-
-    class CustomSession(MockSession):
-        def read_transaction(self, func, *args, **kwargs):
-            return mock_spaces
-
-    async def override_get_session():
-        yield CustomSession()
-
-    app.dependency_overrides[get_neo4j_session] = override_get_session
+    app.dependency_overrides[get_neo4j_session] = lambda: MockSession(return_value=mock_spaces)
 
     # 2. Make request
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:

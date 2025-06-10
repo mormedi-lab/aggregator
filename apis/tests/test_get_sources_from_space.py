@@ -19,14 +19,7 @@ async def test_get_sources_from_space():
     ]
 
     # 2. Custom MockSession that returns Pydantic objects
-    class CustomSession(MockSession):
-        def read_transaction(self, func, *args, **kwargs):
-            return mock_sources
-
-    async def override_get_session():
-        yield CustomSession()
-
-    app.dependency_overrides[get_neo4j_session] = override_get_session
+    app.dependency_overrides[get_neo4j_session] = lambda: MockSession(return_value=mock_sources)
 
     # 3. Make the request (with required project_id)
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
