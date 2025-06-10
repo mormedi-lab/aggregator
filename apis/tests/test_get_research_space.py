@@ -1,9 +1,8 @@
 import pytest
-from httpx import AsyncClient
-from httpx import ASGITransport
-from unittest.mock import MagicMock
+from httpx import AsyncClient, ASGITransport
 from app.main import app
 from app.config import get_neo4j_session
+from tests.MockSession import MockSession
 
 @pytest.mark.asyncio
 async def test_get_research_spaces():
@@ -23,11 +22,12 @@ async def test_get_research_spaces():
         }
     ]
 
-    mock_session = MagicMock()
-    mock_session.read_transaction.return_value = mock_spaces
+    class CustomSession(MockSession):
+        def read_transaction(self, func, *args, **kwargs):
+            return mock_spaces
 
     async def override_get_session():
-        yield mock_session
+        yield CustomSession()
 
     app.dependency_overrides[get_neo4j_session] = override_get_session
 

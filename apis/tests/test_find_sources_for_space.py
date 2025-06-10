@@ -1,9 +1,9 @@
 import pytest
-from httpx import AsyncClient
-from httpx import ASGITransport
-from unittest.mock import AsyncMock, MagicMock, patch
+from httpx import AsyncClient, ASGITransport
+from unittest.mock import AsyncMock, patch
 from app.main import app
-from app.config import get_neo4j_session 
+from app.config import get_neo4j_session
+from tests.MockSession import MockSession, MockTransaction
 
 @pytest.mark.asyncio
 @patch("app.agents.find_sources_agent.Runner.run", new_callable=AsyncMock)
@@ -35,30 +35,32 @@ async def test_find_sources_returns_3_realistic_cards(mock_runner_run):
     ]
     """
 
-    # 2. Mock the Neo4j session
-    mock_session = MagicMock()
-    mock_session.read_transaction.return_value = {
-        "id": "test-space-id",
-        "query": "best cars for dogs",
-        "search_type": "explore",
-        "created_at": "2024-06-01T00:00:00Z"
-    }
-    mock_session.write_transaction.return_value = None
+    # 2. Custom mock session that returns a research space
+    class CustomSession(MockSession):
+        def read_transaction(self, func, *args, **kwargs):
+            return {
+                "id": "test-space-id",
+                "query": "best cars for dogs",
+                "search_type": "explore",
+                "created_at": "2024-06-01T00:00:00Z"
+            }
 
-    # 3. Override the dependency to return the mocked session
+        def write_transaction(self, func, *args, **kwargs):
+            return func(MockTransaction(), *args, **kwargs)
+
     async def override_get_neo4j_session():
-        return mock_session
+        yield CustomSession()
 
     app.dependency_overrides[get_neo4j_session] = override_get_neo4j_session
 
-    # 4. Run the test request using the FastAPI test client
+    # 3. Run request
     async with AsyncClient(
         transport=ASGITransport(app=app),
         base_url="http://test"
     ) as ac:
         response = await ac.post("/space/test-space-id/find_sources")
 
-    # 5. Assertions
+    # 4. Assertions
     assert response.status_code == 200
     data = response.json()
     assert "sources" in data
@@ -66,5 +68,5 @@ async def test_find_sources_returns_3_realistic_cards(mock_runner_run):
     assert data["sources"][0]["publisher"] == "Lemonade Car Insurance"
     assert data["sources"][1]["publisher"] == "Carfax"
 
-    # 6. Clean up overrides
+    # 5. Clean up overrides
     app.dependency_overrides.clear()

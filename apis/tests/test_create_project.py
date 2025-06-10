@@ -1,19 +1,16 @@
 import pytest
 from httpx import AsyncClient
-from unittest.mock import MagicMock
 from fastapi.testclient import TestClient
 from app.main import app
 from app.config import get_neo4j_session
 from httpx import ASGITransport
+from tests.MockSession import MockSession
 
 @pytest.mark.asyncio
 async def test_create_project():
-    # 1. Mock Neo4j session
-    mock_session = MagicMock()
-    mock_session.run.return_value = None  # No return needed for create
-
+    # 1. Use your custom MockSession (no return value needed for project creation)
     async def override_get_session():
-        yield mock_session
+        yield MockSession()  # Can optionally pass a return_value, but not needed here
 
     app.dependency_overrides[get_neo4j_session] = override_get_session
 

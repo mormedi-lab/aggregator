@@ -1,11 +1,11 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { fetchProjectById } from "../api";
+import { fetchProjectById, fetchSourcesForSpace } from "../api";
 import NewResearchSpaceModal from "../components/NewResearchSpaceModal";
 import { fetchResearchSpaces } from "../api";
 import ResearchSpaceCard from "../components/ResearchSpaceCard";
-
-
+import { Source } from "../types";
+import SourceCard from "../components/SourceCard";
 
 export default function ProjectDashboardPage() {
   const { id } = useParams<{ id: string }>();
@@ -14,6 +14,8 @@ export default function ProjectDashboardPage() {
   const [title, setTitle] = useState("");
   const [isNewSearchOpen, setNewSearchOpen] = useState(false);
   const [researchSpaces, setResearchSpaces] = useState<any[]>([]);
+  const [selectedSpaceIds, setSelectedSpaceIds] = useState<Set<string>>(new Set());
+  const [selectedSources, setSelectedSources] = useState<Source[]>([]);
 
   useEffect(() => {
     const loadProject = async () => {
@@ -39,6 +41,27 @@ export default function ProjectDashboardPage() {
     };
     loadSpaces();
   }, [projectId]); 
+
+  useEffect(() => {
+    const loadSourcesForSelectedSpaces = async () => {
+      const allSources: Source[] = [];
+
+      for (const spaceId of selectedSpaceIds) {
+        const res = await fetchSourcesForSpace(spaceId, projectId);
+        const addedSources = res.sources.filter((s: Source) => s.is_in_project);
+        allSources.push(...addedSources);
+      }
+
+      setSelectedSources(allSources);
+    };
+
+    if (selectedSpaceIds.size > 0) {
+      loadSourcesForSelectedSpaces();
+    } else {
+      setSelectedSources([]); // Clear if none selected
+    }
+  }, [selectedSpaceIds, projectId]);
+
 
   return (
     <div className="min-h-screen bg-[#FAF9F5] px-8 py-6">
@@ -77,10 +100,21 @@ export default function ProjectDashboardPage() {
                 {Array.isArray(researchSpaces) &&
                 researchSpaces.map((space) => (
                     <ResearchSpaceCard
-                    key={space.id}
-                    space={space}
-                    onClick={() => {}} //THIS WILL LATER BE USED TO FILTER SOURCES IN THE CHAT
-                    onVisit={(id) => navigate(`/project/${projectId}/space/${id}`)}
+                      key={space.id}
+                      space={space}
+                      selected={selectedSpaceIds.has(space.id)}
+                      onClick={() => {
+                        setSelectedSpaceIds(prev => {
+                          const newSet = new Set(prev);
+                          if (newSet.has(space.id)) {
+                            newSet.delete(space.id);
+                          } else {
+                            newSet.add(space.id);
+                          }
+                          return newSet;
+                        });
+                      }}
+                      onVisit={(id) => navigate(`/project/${projectId}/space/${id}`)}
                     />
                 ))}
             </div>
@@ -100,12 +134,15 @@ export default function ProjectDashboardPage() {
   
           {/* Right: Saved sources placeholder */}
           <div className="space-y-4">
-            {/* Example card */}
-            <div className="border border-[#E0D8CF] bg-white rounded-md p-4 shadow-sm">
-              <div className="text-sm text-[#827F7F] mt-1">
-                Filtered source cards will appear here
+            {selectedSources.length === 0 ? (
+              <div className="text-sm text-[#827F7F] mt-1">No sources selected.</div>
+            ) : (
+              <div className="grid grid-cols-1 gap-3">
+                {selectedSources.map((source) => (
+                  <SourceCard key={source.id} source={source} variant="added" onAdd={() => {}} />
+                ))}
               </div>
-            </div>
+            )}
           </div>
         </div>
       </div>

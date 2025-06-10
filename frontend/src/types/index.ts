@@ -4,7 +4,6 @@ export interface Project {
   industry: string;
   objective: string;
   last_accessed: string;
-  hasBenchmark?: boolean;
 }
 
 export interface Source {
@@ -14,8 +13,9 @@ export interface Source {
     url: string;
     date_published: string;
     summary: string;
+    image_url: string;
     is_trusted?: boolean;
-    isInProject?: boolean;
+    is_in_project?: boolean;
   }
   
   export interface ResearchSpace {
@@ -31,6 +31,7 @@ export interface Source {
       search_type: string;
       created_at: string;
     };
+    selected: boolean;
     onClick: (id: string) => void;
     onVisit?: (id: string) => void;
   }

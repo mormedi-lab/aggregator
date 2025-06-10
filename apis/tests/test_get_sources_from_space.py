@@ -1,15 +1,14 @@
 import pytest
 from httpx import AsyncClient, ASGITransport
-from unittest.mock import MagicMock
 from app.main import app
-from app.models.source import Source, Sources
+from app.models.source import Source
 from app.config import get_neo4j_session
+from tests.MockSession import MockSession
 
 @pytest.mark.asyncio
 async def test_get_sources_from_space():
-    # 1. Mock Neo4j session and response
-    mock_session = MagicMock()
-    mock_session.read_transaction.return_value = [
+    # 1. Prepare Pydantic Source objects
+    mock_sources = [
         Source(
             publisher="Test Publisher",
             headline="Test Headline",
@@ -19,19 +18,23 @@ async def test_get_sources_from_space():
         )
     ]
 
-    async def override_get_session():
-        yield mock_session
+    # 2. Custom MockSession that returns Pydantic objects
+    class CustomSession(MockSession):
+        def read_transaction(self, func, *args, **kwargs):
+            return mock_sources
 
-    # 2. Inject the mock session
+    async def override_get_session():
+        yield CustomSession()
+
     app.dependency_overrides[get_neo4j_session] = override_get_session
 
-    # 3. Make the test request
+    # 3. Make the request (with required project_id)
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
-        response = await ac.get("/space/test-space-id/sources")
+        response = await ac.get("/space/test-space-id/sources?project_id=test-project-id")
 
-    # 4. Cleanup + assertions
     app.dependency_overrides.clear()
 
+    # 4. Assertions
     assert response.status_code == 200
     data = response.json()
     assert "sources" in data
