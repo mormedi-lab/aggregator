@@ -2,7 +2,7 @@ import { useState } from "react";
 import { MoreHorizontal } from "lucide-react";
 import { ResearchSpaceCardProps } from "../types";
 
-export default function ResearchSpaceCard({ space, onClick, onVisit, selected }: ResearchSpaceCardProps) {
+export default function ResearchSpaceCard({ space, onClick, onVisit, onDelete, selected }: ResearchSpaceCardProps) {
   const [isHovered, setHovered] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -48,8 +48,12 @@ export default function ResearchSpaceCard({ space, onClick, onVisit, selected }:
           </button>
           <div className="border-t border-[#E0D8CF]"></div>
           <button
-            disabled
-            className="block w-full text-left px-4 py-2 text-sm text-[#999] cursor-not-allowed"
+            onClick={(e) => {
+              e.stopPropagation();
+              setMenuOpen(false);
+              onDelete?.(space.id);
+            }}
+            className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-[#FAF9F5]"
           >
             Delete
           </button>

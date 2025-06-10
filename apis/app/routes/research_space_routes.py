@@ -1,13 +1,13 @@
 import uuid
 from datetime import datetime
-from fastapi import APIRouter, status
+from fastapi import APIRouter, status, HTTPException
 from fastapi.responses import JSONResponse
 
 from app.config import SessionNeo4j
 from app.models.research_space import CreateResearchSpaceRequest, ResearchSpaceResponse
-from app.services.neo4j_research_space_service import fetch_research_spaces_for_project
-from app.services.neo4j_research_space_service import create_research_space_node
-from app.services.neo4j_research_space_service import fetch_single_research_space_by_id   
+from app.models.source import Sources
+from app.models.response import StatusResponse
+from app.services.neo4j_research_space_service import fetch_research_spaces_for_project, create_research_space_node, fetch_single_research_space_by_id, delete_research_space_and_sources, fetch_project_sources_for_space
 
 router = APIRouter()
 
@@ -35,3 +35,15 @@ def get_research_space(session: SessionNeo4j, project_id: str, space_id: str) ->
     if space is None:
         raise HTTPException(status_code=404, detail="Research space not found")
     return space
+
+@router.delete("/project/{project_id}/spaces/{space_id}")
+def delete_research_space(session: SessionNeo4j, project_id: str, space_id: str)-> StatusResponse:
+    deleted: bool = session.write_transaction(delete_research_space_and_sources, space_id)
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Research space not found")
+    
+    return StatusResponse(status="success", message=f"Research space {space_id} deleted")
+
+@router.get("/project/{project_id}/spaces/{space_id}/has_project_sources", response_model=Sources)
+def check_research_space_has_project_sources(session: SessionNeo4j, project_id: str, space_id: str) -> Sources:
+    return session.read_transaction(fetch_project_sources_for_space, project_id, space_id)

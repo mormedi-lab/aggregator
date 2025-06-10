@@ -1,5 +1,6 @@
 from neo4j import Transaction
 from app.models.research_space import ResearchSpace
+from app.models.source import Source, Sources
 
 def create_research_space_node(tx: Transaction, project_id: str, space: ResearchSpace):
     query = """
@@ -53,6 +54,21 @@ def fetch_single_research_space_by_id(tx: Transaction, space_id: str):
         "created_at": record["created_at"],
     }
 
+def delete_research_space_and_sources(tx: Transaction, space_id: str) -> bool:
+    query = """
+    MATCH (space:ResearchSpace {id: $space_id})
+    OPTIONAL MATCH (space)-[:HAS_SOURCE]->(source:Source)
+    DETACH DELETE space, source
+    RETURN COUNT(space) > 0 AS deleted
+    """
+    result = tx.run(query, space_id=space_id).single()
+    return result["deleted"]
 
-
-
+def fetch_project_sources_for_space(tx, project_id: str, space_id: str) -> Sources:
+    query = """
+    MATCH (p:Project {id: $project_id})-[:INCLUDES]->(s:Source)<-[:HAS_SOURCE]-(rs:ResearchSpace {id: $space_id})
+    RETURN s
+    """
+    result = tx.run(query, project_id=project_id, space_id=space_id)
+    sources = [Source(**record["s"]) for record in result]
+    return Sources(sources=sources)

@@ -109,6 +109,19 @@ export async function addSourceToProject(spaceId: string, projectId: string, sou
   return res.json();
 }
 
+export async function deleteResearchSpace(projectId: string, spaceId: string) {
+  const res = await fetch(`${API}/project/${projectId}/spaces/${spaceId}`, {
+    method: "DELETE",
+  });
+  if (!res.ok) throw new Error("Failed to delete research space");
+}
+
+export async function checkHasProjectSources(projectId: string, spaceId: string) {
+  const res = await fetch(`${API}/project/${projectId}/spaces/${spaceId}/has_project_sources`);
+  if (!res.ok) throw new Error("Failed to fetch linked sources");
+  return await res.json(); 
+}
+
 
 
 
