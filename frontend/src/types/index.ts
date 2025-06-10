@@ -34,6 +34,7 @@ export interface Source {
     selected: boolean;
     onClick: (id: string) => void;
     onVisit?: (id: string) => void;
+    onDelete?: (id: string) => void;
   }
 
   export interface NewResearchSpaceModalProps {
@@ -48,3 +49,9 @@ export interface Source {
     onAdd?: () => void;
   }
   
+  export interface DeleteResearchSpaceWarningModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+    onConfirm: () => void;
+    spaceTitle?: string; 
+  }

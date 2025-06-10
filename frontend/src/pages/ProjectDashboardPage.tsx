@@ -1,11 +1,12 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { fetchProjectById, fetchSourcesForSpace } from "../api";
+import { checkHasProjectSources, deleteResearchSpace, fetchProjectById, fetchSourcesForSpace } from "../api";
 import NewResearchSpaceModal from "../components/NewResearchSpaceModal";
 import { fetchResearchSpaces } from "../api";
 import ResearchSpaceCard from "../components/ResearchSpaceCard";
 import { Source } from "../types";
 import SourceCard from "../components/SourceCard";
+import DeleteResearchSpaceWarningModal from "../components/DeleteResearchSpaceWarningModal";
 
 export default function ProjectDashboardPage() {
   const { id } = useParams<{ id: string }>();
@@ -16,6 +17,8 @@ export default function ProjectDashboardPage() {
   const [researchSpaces, setResearchSpaces] = useState<any[]>([]);
   const [selectedSpaceIds, setSelectedSpaceIds] = useState<Set<string>>(new Set());
   const [selectedSources, setSelectedSources] = useState<Source[]>([]);
+  const [warningModalOpen, setWarningModalOpen] = useState(false);
+  const [spacePendingDelete, setSpacePendingDelete] = useState<any | null>(null);
 
   useEffect(() => {
     const loadProject = async () => {
@@ -62,7 +65,34 @@ export default function ProjectDashboardPage() {
     }
   }, [selectedSpaceIds, projectId]);
 
+  const handleDelete = async (spaceId: string) => {
+    try {
+      await deleteResearchSpace(projectId, spaceId);
+      setResearchSpaces((prev) => prev.filter((s) => s.id !== spaceId));
+      setSelectedSpaceIds((prev) => {
+        const updated = new Set(prev);
+        updated.delete(spaceId);
+        return updated;
+      });
+    } catch (err) {
+      console.error("❌ Failed to delete research space", err);
+    }
+  };
 
+  const handleDeleteRequest = async (space: any) => {
+    try {
+      const hasLinkedSources = await checkHasProjectSources(projectId, space.id);
+      if (hasLinkedSources) {
+        setSpacePendingDelete(space);
+        setWarningModalOpen(true);
+      } else {
+        await handleDelete(space.id);
+      }
+    } catch (err) {
+      console.error("Error checking source links", err);
+    }
+  };
+   
   return (
     <div className="min-h-screen bg-[#FAF9F5] px-8 py-6">
       {/* Back to projects */}
@@ -115,6 +145,7 @@ export default function ProjectDashboardPage() {
                         });
                       }}
                       onVisit={(id) => navigate(`/project/${projectId}/space/${id}`)}
+                      onDelete={() => handleDeleteRequest(space)}
                     />
                 ))}
             </div>
@@ -146,6 +177,19 @@ export default function ProjectDashboardPage() {
           </div>
         </div>
       </div>
+      <DeleteResearchSpaceWarningModal
+        isOpen={warningModalOpen}
+        onClose={() => {
+          setWarningModalOpen(false);
+          setSpacePendingDelete(null);
+        }}
+        onConfirm={() => {
+          if (spacePendingDelete) {
+            handleDelete(spacePendingDelete.id);
+          }
+        }}
+        spaceTitle={spacePendingDelete?.query}
+      />
     </div>
   );
 }
