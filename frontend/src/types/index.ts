@@ -55,3 +55,7 @@ export interface Source {
     onConfirm: () => void;
     spaceTitle?: string; 
   }
+
+  export interface IndustryPillProps {
+    label: string;
+  }

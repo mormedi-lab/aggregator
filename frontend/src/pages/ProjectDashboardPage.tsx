@@ -7,6 +7,7 @@ import ResearchSpaceCard from "../components/ResearchSpaceCard";
 import { Source } from "../types";
 import SourceCard from "../components/SourceCard";
 import DeleteResearchSpaceWarningModal from "../components/DeleteResearchSpaceWarningModal";
+import IndustryPill from "../components/IndustryPill";
 
 export default function ProjectDashboardPage() {
   const { id } = useParams<{ id: string }>();
@@ -19,12 +20,19 @@ export default function ProjectDashboardPage() {
   const [selectedSources, setSelectedSources] = useState<Source[]>([]);
   const [warningModalOpen, setWarningModalOpen] = useState(false);
   const [spacePendingDelete, setSpacePendingDelete] = useState<any | null>(null);
-
+  const [industries, setIndustries] = useState<string[]>([]);
+  
   useEffect(() => {
     const loadProject = async () => {
       try {
         const data = await fetchProjectById(id as string);
         setTitle(data.title);
+    
+        // split industry tags by comma or semicolon
+        if (data.industry) {
+          const parsedTags = data.industry.split(/[,;]/).map((tag: string) => tag.trim());
+          setIndustries(parsedTags);
+        }
       } catch (err) {
         console.error("Failed to load project title", err);
       }
@@ -107,11 +115,22 @@ export default function ProjectDashboardPage() {
   
       {/* Project Title + New Search Button */}
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-semibold text-[#FF5400]">{title || "Loading..."}</h1>
-        <button onClick={() => setNewSearchOpen(true)} className="bg-[#FF5400] hover:bg-[#ff6a1a] text-white px-5 py-[8px] rounded-md text-sm leading-[1.2rem] font-medium shadow-sm">
+        <div className="flex items-center flex-wrap gap-3">
+          <h1 className="text-3xl font-semibold text-[#FF5400]">{title || "Loading..."}</h1>
+          <div className="flex flex-wrap gap-2">
+            {industries.map((industry) => (
+              <IndustryPill key={industry} label={industry} />
+            ))}
+          </div>
+        </div>
+        <button
+          onClick={() => setNewSearchOpen(true)}
+          className="bg-[#FF5400] hover:bg-[#ff6a1a] text-white px-5 py-[8px] rounded-md text-sm leading-[1.2rem] font-medium shadow-sm"
+        >
           + New Research Space
         </button>
       </div>
+
 
       <NewResearchSpaceModal
         isOpen={isNewSearchOpen}
