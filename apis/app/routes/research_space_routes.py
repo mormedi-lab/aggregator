@@ -1,33 +1,51 @@
-import uuid
+from uuid import uuid4
 from datetime import datetime
 from fastapi import APIRouter, status, HTTPException
 from fastapi.responses import JSONResponse
 
 from app.config import SessionNeo4j
-from app.models.research_space import CreateResearchSpaceRequest, ResearchSpaceResponse
-from app.models.source import Sources
+from app.models.research_space import CreateResearchSpaceRequest, ResearchSpaceResponse, ResearchSpace
+from app.models.source import Sources, Source
 from app.models.response import StatusResponse
 from app.services.neo4j_research_space_service import fetch_research_spaces_for_project, create_research_space_node, fetch_single_research_space_by_id, delete_research_space_and_sources, fetch_project_sources_for_space
+from app.services.neo4j_source_service import create_sources_for_space
+from app.agents.prompt_generator_agent import generate_prompt
+from app.agents.find_sources_agent import find_sources_from_prompt
+from app.agents.generate_space_title_agent import generate_space_title
+
 
 router = APIRouter()
 
-@router.post("/project/{project_id}/spaces", response_model=ResearchSpaceResponse)
-def create_research_space(session: SessionNeo4j, project_id: str, body: CreateResearchSpaceRequest) -> ResearchSpaceResponse:
-    space_id = str(uuid.uuid4())
-    space = body.model_copy(update={"id": space_id, "created_at": datetime.utcnow().isoformat()})
-    
+@router.post("/project/{project_id}/spaces", response_model=ResearchSpace)
+async def create_research_space(session: SessionNeo4j, project_id: str, body: CreateResearchSpaceRequest):
+    now = datetime.utcnow()
+    space_id = str(uuid4())
+
+    space_title = await generate_space_title(body.research_question)
+
+    space = {
+        "id": space_id,
+        "project_id": project_id,
+        "created_at": now,
+        "query": "",  # will be generated later
+        "search_type": body.search_type,
+        "research_question": body.research_question,
+        "industries": body.industries,
+        "geographies": body.geographies,
+        "timeframe": body.timeframe,
+        "insight_style": body.insight_style,
+        "additional_notes": body.additional_notes,
+        "space_title": space_title,
+    }
+
     session.write_transaction(create_research_space_node, project_id, space)
-    return ResearchSpaceResponse(
-        id=space.id,
-        query=space.query,
-        search_type=space.search_type,
-        created_at=space.created_at
-    )
+
+    return ResearchSpace(**space)
 
 @router.get("/project/{project_id}/spaces", response_model=list[ResearchSpaceResponse])
 def get_research_spaces(session: SessionNeo4j, project_id: str) -> list[ResearchSpaceResponse]:
-    return session.read_transaction(fetch_research_spaces_for_project, project_id)
-
+    results = session.read_transaction(fetch_research_spaces_for_project, project_id)
+    return results
 
 @router.get("/project/{project_id}/spaces/{space_id}", response_model=ResearchSpaceResponse)
 def get_research_space(session: SessionNeo4j, project_id: str, space_id: str) -> ResearchSpaceResponse:

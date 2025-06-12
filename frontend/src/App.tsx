@@ -4,6 +4,7 @@ import LoginPage from "./pages/LoginPage";
 import ProjectsPage from "./pages/ProjectsPage";
 import ProjectDashboardPage from "./pages/ProjectDashboardPage";
 import ResearchSpacePage from "./pages/ResearchSpacePage";
+import ResearchSpaceLoadingPage from "./pages/ResearchSpaceLoadingPage";
 
 function App() {
   return (
@@ -24,6 +25,15 @@ function App() {
         element={
           <AppLayout>
             <ProjectDashboardPage  />
+          </AppLayout>
+        }
+      />
+
+      <Route
+        path="/project/:id/space/:spaceId/loading"
+        element={
+          <AppLayout>
+            <ResearchSpaceLoadingPage />
           </AppLayout>
         }
       />

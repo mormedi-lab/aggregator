@@ -1,6 +1,7 @@
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { fetchResearchSpaceById, postSourcesToSpace, fetchSourcesForSpace, addSourceToProject } from "../api";
+import { useNavigate } from "react-router-dom";
+import { fetchResearchSpaceById,  fetchSourcesForSpace, addSourceToProject } from "../api";
 import { Source, ResearchSpace } from "../types";
 import SourceCard from "../components/SourceCard";
 
@@ -8,7 +9,7 @@ export default function ResearchSpacePage() {
   const { id: projectId, spaceId } = useParams<{ id: string; spaceId: string }>();
   const [space, setSpace] = useState<ResearchSpace | null>(null);
   const [sources, setSources] = useState<Source[]>([]);
-  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   const handleAddSource = async (sourceId: string) => {
     try {
@@ -29,49 +30,36 @@ export default function ResearchSpacePage() {
       try {
         const loadedSpace = await fetchResearchSpaceById(projectId!, spaceId!);
         setSpace(loadedSpace);
-  
-        // 1. Try to fetch saved sources first
         const res = await fetchSourcesForSpace(spaceId!, projectId!);
-        if (res.sources.length > 0) {
-          setSources(res.sources);
-        } else {
-          // 2. If no saved sources, generate them now
-          const generated = await postSourcesToSpace(spaceId!);
-          setSources(generated.sources);
-        }
+        setSources(res.sources);
       } catch (err) {
-        console.error("Failed to load or generate sources", err);
-      } finally {
-        setLoading(false);
-      }
+        console.error("Failed to load sources", err);
+      } 
     };
   
     if (projectId && spaceId) loadSpaceAndSources();
   }, [projectId, spaceId]);  
 
-  if (loading || !space) {
-    return (
-      <div className="p-6 bg-[#FAF9F5] min-h-screen text-[#827F7F]">
-        Loading Research Space...
-      </div>
-    );
-  }
 
   const added = sources.filter((s) => s.is_in_project);
   const explore = sources.filter((s) => !s.is_in_project);
+
+  if (!space) return null;
 
   return (
     <div className="px-6 py-8 bg-[#FAF9F5] min-h-screen">
       {/* Back link (optional) */}
       <button
-        onClick={() => window.history.back()}
+        onClick={() => navigate(`/project/${projectId}/dashboard`)}
         className="text-sm text-[#666565] hover:text-[#2D2114] mb-4 block"
       >
         ← Project Dashboard
       </button>
 
       {/* Title */}
-      <h1 className="text-2xl font-semibold text-[#2D2114] mb-2">{space.query}</h1>
+      <h1 className="text-2xl font-semibold text-[#2D2114] mb-2">
+        {space.space_title || "[Untitled Research Space]"}
+      </h1>
 
       {/* Section 1: Added to Project */}
       <h2 className="text-lg font-medium text-[#2D2114] mt-8">Added to Project</h2>
