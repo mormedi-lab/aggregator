@@ -41,6 +41,7 @@ export interface Source {
     isOpen: boolean;
     onClose: () => void;
     projectId: string;
+    projectIndustries: string[];
   }
 
   export interface SourceCardProps {

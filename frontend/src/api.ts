@@ -55,21 +55,30 @@ export async function findSources(prompt: string) {
   if (!res.ok) throw new Error("Failed to find sources");
 }
 
-export async function createResearchSpace(projectId: string, query: string, searchType: string) {
+export async function createResearchSpace(projectId: string, formData: {
+  research_question: string;
+  industries: string[];
+  geographies?: string[];
+  timeframe?: string;
+  insight_style?: string;
+  additional_notes?: string;
+  search_type: string;
+}) {
   const response = await fetch(`${API}/project/${projectId}/spaces`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ query, search_type: searchType }),
+    body: JSON.stringify(formData),
   });
 
   if (!response.ok) {
     throw new Error("Failed to create research space");
   }
 
-  return await response.json();
+  return await response.json(); 
 }
+
 
 
 export async function fetchResearchSpaces(projectId: string) {

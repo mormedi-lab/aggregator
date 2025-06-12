@@ -136,6 +136,7 @@ export default function ProjectDashboardPage() {
         isOpen={isNewSearchOpen}
         onClose={() => setNewSearchOpen(false)}
         projectId={id as string}
+        projectIndustries={industries}
       />
   
       {/* Section 1: Research Spaces */}

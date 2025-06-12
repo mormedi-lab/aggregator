@@ -2,24 +2,39 @@ from neo4j import Transaction
 from app.models.research_space import ResearchSpace
 from app.models.source import Source, Sources
 
-def create_research_space_node(tx: Transaction, project_id: str, space: ResearchSpace):
+def create_research_space_node(tx, project_id: str, space):
     query = """
     MATCH (p:Project {id: $project_id})
     CREATE (s:ResearchSpace {
         id: $id,
-        query: $query,
+        search_query: $search_query,
         search_type: $search_type,
-        created_at: $created_at
+        created_at: $created_at,
+        research_question: $research_question,
+        industries: $industries,
+        geographies: $geographies,
+        timeframe: $timeframe,
+        insight_style: $insight_style,
+        additional_notes: $additional_notes
     })
     MERGE (p)-[:HAS_SPACE]->(s)
+    RETURN s
     """
-    tx.run(query, {
-        "project_id": project_id,
-        "id": space.id,
-        "query": space.query,
-        "search_type": space.search_type,
-        "created_at": space.created_at,
-    })
+
+    tx.run(query, 
+        project_id=project_id,
+        id=space.id,
+        search_query=space.query,
+        search_type=space.search_type,
+        created_at=space.created_at,
+        research_question=space.research_question,
+        industries=space.industries,
+        geographies=space.geographies,
+        timeframe=space.timeframe,
+        insight_style=space.insight_style,
+        additional_notes=space.additional_notes,
+    )
+
 
 
 def fetch_research_spaces_for_project(tx: Transaction, project_id: str):
@@ -32,7 +47,7 @@ def fetch_research_spaces_for_project(tx: Transaction, project_id: str):
     return [ 
         {
             "id": record["id"],
-            "query": record["query"],
+            "query": record["query"] or "",
             "search_type": record["search_type"],
             "created_at": record["created_at"],
         }
@@ -49,7 +64,7 @@ def fetch_single_research_space_by_id(tx: Transaction, space_id: str):
         return None
     return {
         "id": record["id"],
-        "query": record["query"],
+        "query": record["query"] or "",
         "search_type": record["search_type"],
         "created_at": record["created_at"],
     }

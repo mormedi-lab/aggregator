@@ -1,6 +1,7 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 from datetime import datetime
+from app.models.source import Sources
 
 class ResearchSpace(BaseModel):
     id: str
@@ -10,8 +11,13 @@ class ResearchSpace(BaseModel):
     created_at: datetime
 
 class CreateResearchSpaceRequest(BaseModel):
-    query: str
     search_type: str
+    research_question: str
+    industries: List[str]
+    geographies: Optional[List[str]] = []
+    timeframe: Optional[str] = ""
+    insight_style: Optional[str] = ""
+    additional_notes: Optional[str] = ""
 
 class ResearchSpaceResponse(BaseModel):
     id: str

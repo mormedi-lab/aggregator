@@ -14,7 +14,7 @@ async def test_get_sources_from_space():
             headline="Test Headline",
             url="https://example.com/article",
             summary="A test summary",
-            is_curated=False
+            is_trusted=False
         )
     ]
 
