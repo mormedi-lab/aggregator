@@ -29,18 +29,10 @@ export default function ResearchSpacePage() {
       try {
         const loadedSpace = await fetchResearchSpaceById(projectId!, spaceId!);
         setSpace(loadedSpace);
-  
-        // 1. Try to fetch saved sources first
         const res = await fetchSourcesForSpace(spaceId!, projectId!);
-        if (res.sources.length > 0) {
-          setSources(res.sources);
-        } else {
-          // 2. If no saved sources, generate them now
-          const generated = await postSourcesToSpace(spaceId!);
-          setSources(generated.sources);
-        }
+        setSources(res.sources);
       } catch (err) {
-        console.error("Failed to load or generate sources", err);
+        console.error("Failed to load sources", err);
       } finally {
         setLoading(false);
       }
@@ -52,7 +44,7 @@ export default function ResearchSpacePage() {
   if (loading || !space) {
     return (
       <div className="p-6 bg-[#FAF9F5] min-h-screen text-[#827F7F]">
-        Loading Research Space...
+        Creating your research space...
       </div>
     );
   }
