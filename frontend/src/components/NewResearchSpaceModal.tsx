@@ -12,6 +12,7 @@ export default function NewResearchSpaceModal({ isOpen, onClose, projectId, proj
   const [timeframe, setTimeframe] = useState("");
   const [insightStyle, setInsightStyle] = useState("");
   const [additionalNotes, setAdditionalNotes] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const industries = [
     "Mobility", "Finance", "Retail", "Auto", "Rail",
@@ -51,6 +52,8 @@ export default function NewResearchSpaceModal({ isOpen, onClose, projectId, proj
 
   const handleSubmit = async () => {
     try {
+      setLoading(true); // Show spinner or dim screen
+  
       const formData = {
         research_question: query,
         industries: selectedIndustries,
@@ -61,17 +64,29 @@ export default function NewResearchSpaceModal({ isOpen, onClose, projectId, proj
         search_type: searchType,
       };
   
-      const { id: spaceId } = await createResearchSpace(projectId, formData);
+      // Start request
+      const spacePromise = createResearchSpace(projectId, formData);
   
-      resetAndClose();
-      navigate(`/project/${projectId}/space/${spaceId}`);
+      // Navigate *immediately* to the loading page before the backend finishes
+      spacePromise.then(({ id: spaceId }) => {
+        resetAndClose();
+        navigate(`/project/${projectId}/space/${spaceId}`);
+      });
     } catch (err) {
       console.error("Failed to create research space", err);
+      setLoading(false);
     }
-  };   
+  };    
 
   if (!isOpen) return null;
 
+  if (loading) {
+    return (
+      <div className="fixed inset-0 z-50 bg-black bg-opacity-30 backdrop-blur-sm flex justify-center items-center">
+        <div className="text-white text-lg">Creating your research space...</div>
+      </div>
+    );
+  }
   return (
     <div className="fixed inset-0 z-50 bg-black bg-opacity-30 backdrop-blur-sm flex justify-center items-center px-4">
       <div className="bg-white w-full max-w-3xl rounded-lg shadow-xl p-6 relative">
