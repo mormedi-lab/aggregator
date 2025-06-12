@@ -34,12 +34,23 @@ export default function ResearchSpacePage() {
         setSources(res.sources);
       } catch (err) {
         console.error("Failed to load sources", err);
-      } 
+      }
+        console.error("Failed to load sources", err);
+      } finally {
+        setLoading(false);
+      }
     };
   
     if (projectId && spaceId) loadSpaceAndSources();
   }, [projectId, spaceId]);  
 
+  if (loading || !space) {
+    return (
+      <div className="p-6 bg-[#FAF9F5] min-h-screen text-[#827F7F]">
+        Creating your research space...
+      </div>
+    );
+  }
 
   const added = sources.filter((s) => s.is_in_project);
   const explore = sources.filter((s) => !s.is_in_project);
