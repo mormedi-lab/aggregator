@@ -3,16 +3,7 @@ import {SourceCardProps } from "../types";
 export default function SourceCard({ source, variant = "explore", onAdd }: SourceCardProps) {
 
   return (
-    <div className="flex flex-col border border-[#E0D8CF] bg-[#FAF9F5] hover:bg-white rounded-md p-4 shadow-sm transition min-h-[340px]">
-      {/* Image placeholder */}
-      {source.image_url ? (
-        <img
-          src={source.image_url}
-          alt={source.headline}
-          className="h-32 w-full object-cover rounded mb-3"
-          onError={(e) => (e.currentTarget.style.display = "none")}
-        />
-      ) : null}
+    <div className="flex flex-col border border-[#E0D8CF] bg-[#FAF9F5] hover:bg-white rounded-md p-4 shadow-sm transition">
 
       <div className="flex flex-col flex-grow">
         <div className="text-xs text-[#666565] mb-1">{source.publisher}</div>

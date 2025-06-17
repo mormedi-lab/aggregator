@@ -19,7 +19,6 @@ async def test_check_has_project_sources_returns_sources():
                         "is_in_project": True,
                         "is_trusted": False,
                         "date_published": "2024-06-01",
-                        "image_url": "https://example.com/image.jpg"
                     }
             return [Record()]
 
