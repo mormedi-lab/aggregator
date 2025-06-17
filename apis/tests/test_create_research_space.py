@@ -3,45 +3,39 @@ from httpx import AsyncClient, ASGITransport
 from app.main import app
 from app.config import get_neo4j_session
 from tests.MockSession import MockSession, MockTransaction
-from app.models.research_space import ResearchSpace
 
 @pytest.mark.asyncio
 async def test_create_research_space():
-    # 1. Mock write_transaction to simulate DB insert
+    # 1. Mock write_transaction to return a specific research space dict
     def mock_create_research_space(tx, project_id, space):
         return {
-            "id": space["id"],
-            "query": space["query"],
-            "search_type": space["search_type"],
-            "created_at": space["created_at"],
-            "space_title": space["space_title"]
+            "id": space.id,
+            "query": space.query,
+            "search_type": space.search_type,
+            "created_at": space.created_at,
         }
 
-    app.dependency_overrides[get_neo4j_session] = lambda: MockSession(return_value=None)
+    app.dependency_overrides[get_neo4j_session] = lambda: MockSession(
+        return_value=None  # not used for write, but required
+    )
     MockSession.write_transaction = lambda self, func, *args, **kwargs: mock_create_research_space(MockTransaction(), *args, **kwargs)
 
-    # 2. Valid payload for CreateResearchSpaceRequest
+    # 2. Payload
     payload = {
-        "search_type": "Internet sources only",
-        "research_question": "How are retailers using digital twins?",
-        "industries": ["Retail", "Technology"],
-        "geographies": ["United States"],
-        "timeframe": "Last 2 years",
-        "insight_style": "Trends",
-        "additional_notes": "Include both academic and industry sources"
+        "query": "AI in mobility",
+        "search_type": "explore"
     }
 
-    # 3. Perform request
+    # 3. Execute request to correct route
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
         response = await ac.post("/project/test-project-id/spaces", json=payload)
 
     app.dependency_overrides.clear()
 
-    # 4. Assert response structure
+    # 4. Assert response
     assert response.status_code == 200
     data = response.json()
-    assert data["query"] != ""  # query should be auto-generated
-    assert data["space_title"] != ""  # new: space_title from agent
-    assert data["search_type"] == "Internet sources only"
+    assert data["query"] == "AI in mobility"
+    assert data["search_type"] == "explore"
     assert "created_at" in data
     assert "id" in data
