@@ -40,6 +40,7 @@ def create_research_space_node(tx, project_id: str, space):
     )
 
 
+
 def fetch_research_spaces_for_project(tx: Transaction, project_id: str):
     query = """
     MATCH (p:Project {id: $project_id})-[:HAS_SPACE]->(s:ResearchSpace)
