@@ -7,7 +7,7 @@ import { NewResearchSpaceModalProps } from "../types";
 export default function NewResearchSpaceModal({ isOpen, onClose, projectId, projectIndustries }: NewResearchSpaceModalProps) {
   const navigate = useNavigate();
   const [researchQuestion, setResearchQuestion] = useState("");
-  const [searchType, setSearchType] = useState("All");
+  const [searchType, setSearchType] = useState("Internet sources only");
   const [geographies, setGeographies] = useState<string[]>([]);
   const [timeframe, setTimeframe] = useState("");
   const [insightStyle, setInsightStyle] = useState("");

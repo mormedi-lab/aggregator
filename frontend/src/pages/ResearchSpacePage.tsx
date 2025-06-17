@@ -57,7 +57,9 @@ export default function ResearchSpacePage() {
       </button>
 
       {/* Title */}
-      <h1 className="text-2xl font-semibold text-[#2D2114] mb-2">{space.query}</h1>
+      <h1 className="text-2xl font-semibold text-[#2D2114] mb-2">
+        {space.space_title || "[Untitled Research Space]"}
+      </h1>
 
       {/* Section 1: Added to Project */}
       <h2 className="text-lg font-medium text-[#2D2114] mt-8">Added to Project</h2>

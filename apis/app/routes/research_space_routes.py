@@ -11,6 +11,7 @@ from app.services.neo4j_research_space_service import fetch_research_spaces_for_
 from app.services.neo4j_source_service import create_sources_for_space
 from app.agents.prompt_generator_agent import generate_prompt
 from app.agents.find_sources_agent import find_sources_from_prompt
+from app.agents.generate_space_title_agent import generate_space_title
 
 
 router = APIRouter()
@@ -19,6 +20,8 @@ router = APIRouter()
 async def create_research_space(session: SessionNeo4j, project_id: str, body: CreateResearchSpaceRequest):
     now = datetime.utcnow()
     space_id = str(uuid4())
+
+    space_title = await generate_space_title(body.research_question)
 
     space = {
         "id": space_id,
@@ -32,6 +35,7 @@ async def create_research_space(session: SessionNeo4j, project_id: str, body: Cr
         "timeframe": body.timeframe,
         "insight_style": body.insight_style,
         "additional_notes": body.additional_notes,
+        "space_title": space_title,
     }
 
     session.write_transaction(create_research_space_node, project_id, space)
@@ -40,8 +44,8 @@ async def create_research_space(session: SessionNeo4j, project_id: str, body: Cr
 
 @router.get("/project/{project_id}/spaces", response_model=list[ResearchSpaceResponse])
 def get_research_spaces(session: SessionNeo4j, project_id: str) -> list[ResearchSpaceResponse]:
-    return session.read_transaction(fetch_research_spaces_for_project, project_id)
-
+    results = session.read_transaction(fetch_research_spaces_for_project, project_id)
+    return results
 
 @router.get("/project/{project_id}/spaces/{space_id}", response_model=ResearchSpaceResponse)
 def get_research_space(session: SessionNeo4j, project_id: str, space_id: str) -> ResearchSpaceResponse:

@@ -63,6 +63,7 @@ export async function createResearchSpace(projectId: string, formData: {
   insight_style?: string;
   additional_notes?: string;
   search_type: string;
+  space_title: string;
 }) {
   const response = await fetch(`${API}/project/${projectId}/spaces`, {
     method: "POST",
@@ -85,6 +86,7 @@ export async function fetchResearchSpaces(projectId: string) {
   const res = await fetch(`${API}/project/${projectId}/spaces`);
   if (!res.ok) throw new Error("Failed to fetch research spaces");
   const data = await res.json();
+  console.log("🧪 Fetched research spaces from backend:", data);
   return Array.isArray(data) ? data : [];
 }
 

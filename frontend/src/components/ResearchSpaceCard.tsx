@@ -62,7 +62,7 @@ export default function ResearchSpaceCard({ space, onClick, onVisit, onDelete, s
   
       {/* Card content */}
       <div className="font-normal text-[#2D2114] text-base line-clamp-1">
-        {space.query || "[Untitled Research Space]"}
+        {space.space_title || "[Untitled Research Space]"}
       </div>
       <div className="text-xs text-[#827F7F] mt-1">{space.search_type}</div>
     </div>

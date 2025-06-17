@@ -15,6 +15,7 @@ class ResearchSpace(BaseModel):
     timeframe: Optional[str]
     insight_style: Optional[str]
     additional_notes: Optional[str]
+    space_title: Optional[str] = None
 
 class CreateResearchSpaceRequest(BaseModel):
     search_type: str
@@ -30,3 +31,4 @@ class ResearchSpaceResponse(BaseModel):
     query: str
     search_type: str
     created_at: datetime
+    space_title: Optional[str] = None

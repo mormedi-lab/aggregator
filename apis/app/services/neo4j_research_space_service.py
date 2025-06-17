@@ -16,7 +16,8 @@ def create_research_space_node(tx, project_id: str, space):
         geographies: $geographies,
         timeframe: $timeframe,
         insight_style: $insight_style,
-        additional_notes: $additional_notes
+        additional_notes: $additional_notes,
+        space_title: $space_title
     })
     MERGE (p)-[:HAS_SPACE]->(s)
     RETURN s
@@ -35,13 +36,19 @@ def create_research_space_node(tx, project_id: str, space):
         timeframe=space["timeframe"],
         insight_style=space["insight_style"],
         additional_notes=space["additional_notes"],
+        space_title=space["space_title"],
     )
 
 
 def fetch_research_spaces_for_project(tx: Transaction, project_id: str):
     query = """
     MATCH (p:Project {id: $project_id})-[:HAS_SPACE]->(s:ResearchSpace)
-    RETURN s.id AS id, s.query AS query, s.search_type AS search_type, s.created_at AS created_at
+    RETURN 
+        s.id AS id, 
+        s.query AS query, 
+        s.search_type AS search_type, 
+        s.created_at AS created_at,
+        s.space_title AS space_title
     ORDER BY s.created_at DESC
     """
     result = tx.run(query, {"project_id": project_id})
@@ -51,6 +58,7 @@ def fetch_research_spaces_for_project(tx: Transaction, project_id: str):
             "query": record["query"] or "",
             "search_type": record["search_type"],
             "created_at": record["created_at"].to_native() if hasattr(record["created_at"], "to_native") else record["created_at"],
+            "space_title": record["space_title"] or "", 
         }
         for record in result
     ]
@@ -69,7 +77,8 @@ def fetch_single_research_space_by_id(tx: Transaction, space_id: str):
         s.geographies AS geographies,
         s.timeframe AS timeframe,
         s.insight_style AS insight_style,
-        s.additional_notes AS additional_notes
+        s.additional_notes AS additional_notes,
+        s.space_title AS space_title
     """
     record = tx.run(query, {"space_id": space_id}).single()
     if not record:
@@ -78,7 +87,7 @@ def fetch_single_research_space_by_id(tx: Transaction, space_id: str):
     # Convert created_at to a Python datetime
     created_at = record.get("created_at")
     if hasattr(created_at, "to_native"):
-        created_at = created_at.to_native()  # Convert from neo4j.time.DateTime to datetime.datetime
+        created_at = created_at.to_native()
 
     return {
         **{key: record.get(key) for key in record.keys() if key != "created_at"},
