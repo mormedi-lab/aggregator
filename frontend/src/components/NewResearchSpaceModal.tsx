@@ -1,18 +1,17 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { X } from "lucide-react";
-import { createResearchSpace, postSourcesToSpace } from "../api";
+import { createResearchSpace } from "../api";
 import { NewResearchSpaceModalProps } from "../types";
 
 export default function NewResearchSpaceModal({ isOpen, onClose, projectId, projectIndustries }: NewResearchSpaceModalProps) {
   const navigate = useNavigate();
-  const [query, setQuery] = useState("");
+  const [researchQuestion, setResearchQuestion] = useState("");
   const [searchType, setSearchType] = useState("All");
   const [geographies, setGeographies] = useState<string[]>([]);
   const [timeframe, setTimeframe] = useState("");
   const [insightStyle, setInsightStyle] = useState("");
   const [additionalNotes, setAdditionalNotes] = useState("");
-  const [loading, setLoading] = useState(false);
 
   const industries = [
     "Mobility", "Finance", "Retail", "Auto", "Rail",
@@ -42,20 +41,19 @@ export default function NewResearchSpaceModal({ isOpen, onClose, projectId, proj
     );
   };
 
-  const isFormValid = query.trim() !== "";
+  const isFormValid = researchQuestion.trim() !== "";
 
   const resetAndClose = () => {
-    setQuery("");
+    setResearchQuestion("");
     setSearchType("All");
     onClose();
   };
 
   const handleSubmit = async () => {
     try {
-      setLoading(true); // Show spinner or dim screen
   
       const formData = {
-        research_question: query,
+        research_question: researchQuestion,
         industries: selectedIndustries,
         geographies,
         timeframe,
@@ -64,29 +62,18 @@ export default function NewResearchSpaceModal({ isOpen, onClose, projectId, proj
         search_type: searchType,
       };
   
-      // Start request
-      const spacePromise = createResearchSpace(projectId, formData);
+      const space = await createResearchSpace(projectId, formData);
   
-      // Navigate *immediately* to the loading page before the backend finishes
-      spacePromise.then(({ id: spaceId }) => {
-        resetAndClose();
-        navigate(`/project/${projectId}/space/${spaceId}`);
-      });
+      // Immediately go to the loading screen
+      resetAndClose();
+      navigate(`/project/${projectId}/space/${space.id}/loading`);
     } catch (err) {
       console.error("Failed to create research space", err);
-      setLoading(false);
     }
-  };    
-
+  };
+  
   if (!isOpen) return null;
 
-  if (loading) {
-    return (
-      <div className="fixed inset-0 z-50 bg-black bg-opacity-30 backdrop-blur-sm flex justify-center items-center">
-        <div className="text-white text-lg">Creating your research space...</div>
-      </div>
-    );
-  }
   return (
     <div className="fixed inset-0 z-50 bg-black bg-opacity-30 backdrop-blur-sm flex justify-center items-center px-4">
       <div className="bg-white w-full max-w-3xl rounded-lg shadow-xl p-6 relative">
@@ -132,8 +119,8 @@ export default function NewResearchSpaceModal({ isOpen, onClose, projectId, proj
         <div className="mb-1">
           <label className="text-sm text-[#666565] block mb-1">Describe the main question or topic you’re exploring</label>
           <textarea
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            value={researchQuestion}
+            onChange={(e) => setResearchQuestion(e.target.value)}
             rows={3}
             placeholder="e.g. How are banks in Europe adapting their service models to meet Gen Z expectations?"
             className="w-full border border-[#E0D8CF] rounded-md px-4 py-[12px] text-sm leading-[1.2rem] placeholder-[#827F7F] text-[#2D2114]"

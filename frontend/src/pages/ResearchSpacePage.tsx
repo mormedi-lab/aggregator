@@ -1,6 +1,7 @@
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { fetchResearchSpaceById, postSourcesToSpace, fetchSourcesForSpace, addSourceToProject } from "../api";
+import { useNavigate } from "react-router-dom";
+import { fetchResearchSpaceById,  fetchSourcesForSpace, addSourceToProject } from "../api";
 import { Source, ResearchSpace } from "../types";
 import SourceCard from "../components/SourceCard";
 
@@ -8,7 +9,7 @@ export default function ResearchSpacePage() {
   const { id: projectId, spaceId } = useParams<{ id: string; spaceId: string }>();
   const [space, setSpace] = useState<ResearchSpace | null>(null);
   const [sources, setSources] = useState<Source[]>([]);
-  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   const handleAddSource = async (sourceId: string) => {
     try {
@@ -33,30 +34,23 @@ export default function ResearchSpacePage() {
         setSources(res.sources);
       } catch (err) {
         console.error("Failed to load sources", err);
-      } finally {
-        setLoading(false);
-      }
+      } 
     };
   
     if (projectId && spaceId) loadSpaceAndSources();
   }, [projectId, spaceId]);  
 
-  if (loading || !space) {
-    return (
-      <div className="p-6 bg-[#FAF9F5] min-h-screen text-[#827F7F]">
-        Creating your research space...
-      </div>
-    );
-  }
 
   const added = sources.filter((s) => s.is_in_project);
   const explore = sources.filter((s) => !s.is_in_project);
+
+  if (!space) return null;
 
   return (
     <div className="px-6 py-8 bg-[#FAF9F5] min-h-screen">
       {/* Back link (optional) */}
       <button
-        onClick={() => window.history.back()}
+        onClick={() => navigate(`/project/${projectId}/dashboard`)}
         className="text-sm text-[#666565] hover:text-[#2D2114] mb-4 block"
       >
         ← Project Dashboard

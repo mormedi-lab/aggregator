@@ -7,7 +7,8 @@ def create_research_space_node(tx, project_id: str, space):
     MATCH (p:Project {id: $project_id})
     CREATE (s:ResearchSpace {
         id: $id,
-        search_query: $search_query,
+        project_id: $project_id,
+        query: $search_query,
         search_type: $search_type,
         created_at: $created_at,
         research_question: $research_question,
@@ -21,20 +22,20 @@ def create_research_space_node(tx, project_id: str, space):
     RETURN s
     """
 
-    tx.run(query, 
+    tx.run(
+        query,
         project_id=project_id,
-        id=space.id,
-        search_query=space.query,
-        search_type=space.search_type,
-        created_at=space.created_at,
-        research_question=space.research_question,
-        industries=space.industries,
-        geographies=space.geographies,
-        timeframe=space.timeframe,
-        insight_style=space.insight_style,
-        additional_notes=space.additional_notes,
+        id=space["id"],
+        search_query=space["query"],  
+        search_type=space["search_type"],
+        created_at=space["created_at"],
+        research_question=space["research_question"],
+        industries=space["industries"],
+        geographies=space["geographies"],
+        timeframe=space["timeframe"],
+        insight_style=space["insight_style"],
+        additional_notes=space["additional_notes"],
     )
-
 
 
 def fetch_research_spaces_for_project(tx: Transaction, project_id: str):
@@ -49,7 +50,7 @@ def fetch_research_spaces_for_project(tx: Transaction, project_id: str):
             "id": record["id"],
             "query": record["query"] or "",
             "search_type": record["search_type"],
-            "created_at": record["created_at"],
+            "created_at": record["created_at"].to_native() if hasattr(record["created_at"], "to_native") else record["created_at"],
         }
         for record in result
     ]
@@ -57,16 +58,31 @@ def fetch_research_spaces_for_project(tx: Transaction, project_id: str):
 def fetch_single_research_space_by_id(tx: Transaction, space_id: str):
     query = """
     MATCH (s:ResearchSpace {id: $space_id})
-    RETURN s.id AS id, s.query AS query, s.search_type AS search_type, s.created_at AS created_at
+    RETURN 
+        s.id AS id,
+        s.project_id AS project_id,
+        s.query AS query,
+        s.search_type AS search_type,
+        s.created_at AS created_at,
+        s.research_question AS research_question,
+        s.industries AS industries,
+        s.geographies AS geographies,
+        s.timeframe AS timeframe,
+        s.insight_style AS insight_style,
+        s.additional_notes AS additional_notes
     """
     record = tx.run(query, {"space_id": space_id}).single()
     if not record:
         return None
+
+    # Convert created_at to a Python datetime
+    created_at = record.get("created_at")
+    if hasattr(created_at, "to_native"):
+        created_at = created_at.to_native()  # Convert from neo4j.time.DateTime to datetime.datetime
+
     return {
-        "id": record["id"],
-        "query": record["query"] or "",
-        "search_type": record["search_type"],
-        "created_at": record["created_at"],
+        **{key: record.get(key) for key in record.keys() if key != "created_at"},
+        "created_at": created_at
     }
 
 def delete_research_space_and_sources(tx: Transaction, space_id: str) -> bool:
@@ -87,3 +103,11 @@ def fetch_project_sources_for_space(tx, project_id: str, space_id: str) -> Sourc
     result = tx.run(query, project_id=project_id, space_id=space_id)
     sources = [Source(**record["s"]) for record in result]
     return Sources(sources=sources)
+
+def update_prompt_for_space(tx: Transaction, space_id: str, prompt: str):
+    query = """
+    MATCH (s:ResearchSpace {id: $space_id})
+    SET s.query = $prompt
+    RETURN s
+    """
+    tx.run(query, {"space_id": space_id, "prompt": prompt})
