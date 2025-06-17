@@ -106,7 +106,7 @@ export default function ProjectDashboardPage() {
       {/* Back to projects */}
       <div className="mb-4">
         <button
-          onClick={() => window.history.back()}
+          onClick={() => navigate(`/projects`)}
           className="text-sm text-[#666565] hover:text-[#2D2114]"
         >
           ← Back to All Projects
