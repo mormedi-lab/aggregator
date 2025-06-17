@@ -15,7 +15,7 @@ def create_sources_for_space(tx: Transaction, space_id: str, sources: list[Sourc
                 url: $url,
                 summary: $summary,
                 is_trusted: $is_trusted,
-                date_published: $date_published,
+                date_published: $date_published
             })
             MERGE (s)-[:HAS_SOURCE]->(src)
             """,
@@ -26,7 +26,7 @@ def create_sources_for_space(tx: Transaction, space_id: str, sources: list[Sourc
             url=source.url,
             summary=source.summary or "No summary available",
             is_trusted=source.is_trusted or False,
-            date_published=source.date_published or "2025-01-01",
+            date_published=source.date_published or "2025-01-01"
 )
 
 def fetch_sources_for_space(tx: Transaction, space_id: str, project_id: str):
