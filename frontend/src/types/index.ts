@@ -13,23 +13,40 @@ export interface Source {
     url: string;
     date_published: string;
     summary: string;
-    image_url: string;
     is_trusted?: boolean;
     is_in_project?: boolean;
   }
   
   export interface ResearchSpace {
     id: string;
+    project_id: string;
     query: string;
     search_type: string;
+    created_at: string;
+    space_title?: string; 
+    research_question?: string;
+    industries?: string[];
+    geographies?: string[];
+    timeframe?: string;
+    insight_style?: string;
+    additional_notes?: string;
   }
+  
 
   export interface ResearchSpaceCardProps {
     space: {
       id: string;
+      project_id: string;
       query: string;
       search_type: string;
       created_at: string;
+      space_title?: string; 
+      research_question?: string;
+      industries?: string[];
+      geographies?: string[];
+      timeframe?: string;
+      insight_style?: string;
+      additional_notes?: string;
     };
     selected: boolean;
     onClick: (id: string) => void;
@@ -41,6 +58,7 @@ export interface Source {
     isOpen: boolean;
     onClose: () => void;
     projectId: string;
+    projectIndustries: string[];
   }
 
   export interface SourceCardProps {

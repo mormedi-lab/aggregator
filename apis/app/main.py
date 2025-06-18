@@ -6,6 +6,7 @@ from pathlib import Path
 from app.routes.project_routes import router as project_router
 from app.routes.source_routes import router as source_router
 from app.routes.research_space_routes import router as research_space_router
+from app.routes.prompt_routes import router as prompt_router
 
 app = FastAPI()
 
@@ -20,4 +21,6 @@ app.add_middleware(
 app.include_router(project_router)
 app.include_router(source_router)
 app.include_router(research_space_router)
+app.include_router(prompt_router)
+
 

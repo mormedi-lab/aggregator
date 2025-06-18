@@ -4,7 +4,6 @@ from typing import List
 import re
 import json
 from app.models.source import Source, Sources
-from app.utils.images import extract_image_url
 
 # Define the agent
 agent = Agent(
@@ -42,10 +41,6 @@ async def find_sources_from_prompt(search_prompt: str) -> List[Source]:
         parsed = json.loads(raw_output)
         sources = Sources.model_validate({"sources": parsed}).sources
 
-        #get image url from the source
-        for source in sources:
-            source.image_url = extract_image_url(source.url)
-
         return sources
 
     except (json.JSONDecodeError, ValidationError) as e:
@@ -57,10 +52,6 @@ async def find_sources_from_prompt(search_prompt: str) -> List[Source]:
                 fallback = json.loads(match.group(0))
                 print("\n🧪 Extracted fallback JSON:\n", fallback)
                 fallback_sources = Sources.model_validate({"sources": fallback}).sources
-
-                # ✅ Also enrich fallback sources
-                for source in fallback_sources:
-                    source.image_url = extract_image_url(source.url)
 
                 return fallback_sources
 
