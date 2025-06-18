@@ -26,7 +26,7 @@ export default function NewResearchSpaceModal({ isOpen, onClose, projectId, proj
       projectIndustries &&
       typeof projectIndustries === "string"
     ) {
-      const parsed = projectIndustries.split(",").map(s => s.trim());
+      const parsed = (projectIndustries as string).split(",").map((s: string) => s.trim());
       setSelectedIndustries(parsed);
     } else if (isOpen && Array.isArray(projectIndustries)) {
       setSelectedIndustries(projectIndustries);
@@ -60,6 +60,7 @@ export default function NewResearchSpaceModal({ isOpen, onClose, projectId, proj
         insight_style: insightStyle,
         additional_notes: additionalNotes,
         search_type: searchType,
+        space_title: "",
       };
   
       const space = await createResearchSpace(projectId, formData);
