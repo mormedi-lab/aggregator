@@ -8,6 +8,7 @@ class Source(BaseModel):
     headline: str
     url: str
     summary: str = "No summary available"
+    full_text: Optional[str] = None
     is_trusted: Optional[bool] = False
     date_published: Optional[str] = None
     is_in_project: Optional[bool] = False

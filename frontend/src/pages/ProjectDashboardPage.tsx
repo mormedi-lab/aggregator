@@ -8,6 +8,7 @@ import { Source } from "../types";
 import SourceCard from "../components/SourceCard";
 import DeleteResearchSpaceWarningModal from "../components/DeleteResearchSpaceWarningModal";
 import IndustryPill from "../components/IndustryPill";
+import ChatBox from '../components/ChatBox';
 
 export default function ProjectDashboardPage() {
   const { id } = useParams<{ id: string }>();
@@ -174,17 +175,21 @@ export default function ProjectDashboardPage() {
 
   
       {/* Section 2: Sources */}
-      <div>
+      <div className="h-[70vh] flex flex-col"> 
         <h2 className="text-lg font-medium text-[#2D2114]">Source Library</h2>
         <hr className="border-t border-[#E0D8CF] mb-4" />
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="flex flex-1 gap-6 overflow-hidden">
           {/* Left: Chat box placeholder */}
-          <div className="border border-[#E0D8CF] rounded-md bg-white p-4 min-h-[200px]">
-            <p className="text-sm text-[#827F7F]">[Chat box coming soon]</p>
+          <div className="w-1/2 h-full flex flex-col">
+            <ChatBox
+              projectId={projectId}
+              spaceId={selectedSpaceIds.values().next().value}
+              isDisabled={selectedSources.length === 0}
+            />
           </div>
   
           {/* Right: Saved sources placeholder */}
-          <div className="space-y-4">
+          <div className="w-1/2 h-full overflow-y-auto pr-1">
             {selectedSources.length === 0 ? (
               <div className="text-sm text-[#827F7F] mt-1">No sources selected.</div>
             ) : (

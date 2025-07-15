@@ -143,6 +143,24 @@ export async function checkHasProjectSources(projectId: string, spaceId: string)
   return await res.json(); 
 }
 
+export async function chatWithSources(spaceId: string, projectId: string, userMessage: string): Promise<{ answer: string; citations: string[] }> {
+  const res = await fetch(`${API}/space/${spaceId}/chat_with_sources`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      project_id: projectId,
+      user_message: userMessage,
+    }),
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch chat response");
+  }
+
+  return await res.json();
+}
 
 
 

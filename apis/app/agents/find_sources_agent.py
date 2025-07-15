@@ -19,6 +19,7 @@ agent = Agent(
     - "summary": (string) a 1–2 sentence explanation of why the article is relevant
     - "date_published": (string) in YYYY-MM-DD format
     - "url": (string) a direct link to the article
+    - "full_text": (string) a longer paragraph or excerpt from the article that best explains its key insights. This should be a few paragraphs, not the entire article.
 
     Your response MUST be a single raw JSON array and must NOT include any additional text, commentary, markdown, explanation, or formatting.
 
