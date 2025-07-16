@@ -58,63 +58,67 @@ export default function ResearchSpacePage() {
   if (!space) return null;
 
   return (
-    <div className="px-6 py-8 bg-[#FAF9F5] min-h-screen">
-      {/* Back link (optional) */}
-      <button
-        onClick={() => navigate(`/project/${projectId}/dashboard`)}
-        className="text-sm text-[#666565] hover:text-[#2D2114] mb-4 block"
-      >
-        ← Project Dashboard
-      </button>
-
-      {/* Title */}
-      <h1 className="text-2xl font-semibold text-[#2D2114] mb-2">
-        {space.space_title || "[Untitled Research Space]"}
-      </h1>
-
-      {/* Section 1: Added to Project */}
-      <h2 className="text-lg font-medium text-[#2D2114] mt-8">Added to Project</h2>
-      <hr className="border-t border-[#E0D8CF] mb-4" />
-
-      {added.length === 0 ? (
-        <p className="text-sm text-[#827F7F] mb-6">No sources added to the project yet.</p>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 mb-10">
-          {added.map((source) => (
-            <SourceCard
-              key={source.id}
-              source={source}
-              variant={source.is_in_project ? "added" : "explore"}
-              onAdd={() => handleAddSource(source.id)}
-            />
-          ))}
+    <div className="h-screen overflow-hidden bg-[#FAF9F5] flex flex-col">
+      <div className="flex-1 overflow-y-auto px-8 pt-4 pb-6 flex flex-col">
+        {/* Back link (optional) */}
+        <div className="text-left">
+          <button
+            onClick={() => navigate(`/project/${projectId}/dashboard`)}
+            className="text-sm text-[#666565] hover:text-[#2D2114] mb-4 block"
+          >
+            ← Project Dashboard
+          </button>
         </div>
-      )}
 
-      {/* Section 2: Explore Sources */}
-      <h2 className="text-lg font-medium text-[#2D2114] mt-10">Explore Sources</h2>
-      <hr className="border-t border-[#E0D8CF] mb-4" />
+        {/* Title */}
+        <h1 className="text-2xl font-semibold text-[#2D2114] mb-2">
+          {space.space_title || "[Untitled Research Space]"}
+        </h1>
 
-      {explore.length === 0 ? (
-        <p className="text-sm text-[#827F7F]">No new sources found for this query.</p>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {explore.map((source) => (
-            <SourceCard
-              key={source.id}
-              source={source}
-              variant={source.is_in_project ? "added" : "explore"}
-              onAdd={() => handleAddSource(source.id)}
-            />
-          ))}
+        {/* Section 1: Added to Project */}
+        <h2 className="text-lg font-medium text-[#2D2114] mt-8">Added to Project</h2>
+        <hr className="border-t border-[#E0D8CF] mb-4" />
+
+        {added.length === 0 ? (
+          <p className="text-sm text-[#827F7F] mb-6">No sources added to the project yet.</p>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 mb-10">
+            {added.map((source) => (
+              <SourceCard
+                key={source.id}
+                source={source}
+                variant={source.is_in_project ? "added" : "explore"}
+                onAdd={() => handleAddSource(source.id)}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* Section 2: Explore Sources */}
+        <h2 className="text-lg font-medium text-[#2D2114] mt-10">Explore Sources</h2>
+        <hr className="border-t border-[#E0D8CF] mb-4" />
+
+        {explore.length === 0 ? (
+          <p className="text-sm text-[#827F7F]">No new sources found for this query.</p>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {explore.map((source) => (
+              <SourceCard
+                key={source.id}
+                source={source}
+                variant={source.is_in_project ? "added" : "explore"}
+                onAdd={() => handleAddSource(source.id)}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* Generate More Sources */}
+        <div className="flex justify-center mt-10">
+          <button className="text-sm text-[#666565] border border-dashed border-[#E0D8CF] rounded-full px-6 py-2">
+            + Generate More Sources
+          </button>
         </div>
-      )}
-
-      {/* Generate More Sources */}
-      <div className="flex justify-center mt-10">
-        <button className="text-sm text-[#666565] border border-dashed border-[#E0D8CF] rounded-full px-6 py-2">
-          + Generate More Sources
-        </button>
       </div>
     </div>
   );
