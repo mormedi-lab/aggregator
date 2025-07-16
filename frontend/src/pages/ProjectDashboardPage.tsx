@@ -106,7 +106,7 @@ export default function ProjectDashboardPage() {
       {/* Back to projects */}
       <div className="mb-4">
         <button
-          onClick={() => window.history.back()}
+          onClick={() => navigate(`/projects`)}
           className="text-sm text-[#666565] hover:text-[#2D2114]"
         >
           ← Back to All Projects
@@ -136,6 +136,7 @@ export default function ProjectDashboardPage() {
         isOpen={isNewSearchOpen}
         onClose={() => setNewSearchOpen(false)}
         projectId={id as string}
+        projectIndustries={industries}
       />
   
       {/* Section 1: Research Spaces */}

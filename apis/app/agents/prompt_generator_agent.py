@@ -16,12 +16,12 @@ agent = Agent(
 # Format form responses into structured input
 def build_user_input(data: PromptInput) -> str:
     return "\n".join([
-        f"Benchmark Objective: {data.objective}",
-        f"Target Companies: {data.companies}",
-        f"Relevant Industries or Sectors: {data.industries}",
-        f"Geographies or Markets of Focus: {data.geographies}",
-        f"Time Frame: {data.timeframe}",
-        f"Preferred Source Type: {data.source_type}",
+        f"Main Research Question: {data.research_question}",
+        f"Relevant Industries: {', '.join(data.industries)}",
+        f"Geographies or Markets: {', '.join(data.geographies) if data.geographies else 'None'}",
+        f"Time Frame: {data.timeframe or 'Any'}",
+        f"Ideal Insights: {data.insight_style or 'Any'}",
+        f"Additional Context: {data.additional_notes or 'None'}",
     ])
 
 # Generate the search query using the agent
