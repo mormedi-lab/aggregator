@@ -184,7 +184,7 @@ export default function ProjectDashboardPage() {
             <div className="w-1/2 h-full flex flex-col">
               <ChatBox
                 projectId={projectId}
-                spaceId={selectedSpaceIds.values().next().value}
+                spaceIds={Array.from(selectedSpaceIds)}
                 isDisabled={selectedSources.length === 0}
               />
             </div>

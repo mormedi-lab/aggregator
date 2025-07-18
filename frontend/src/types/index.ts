@@ -80,7 +80,7 @@ export interface Source {
 
   export interface ChatBoxProps {
     projectId: string;
-    spaceId: string;
+    spaceIds: string[];
     isDisabled: boolean;
   }
 
@@ -92,6 +92,4 @@ export interface Source {
   export interface ChatTurn {
     userMessage: ChatMessage;
     assistantMessage: ChatMessage;
-    citations: string[];
   }
-  

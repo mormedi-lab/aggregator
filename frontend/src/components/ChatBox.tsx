@@ -1,8 +1,11 @@
 import { useState } from 'react';
 import { ChatMessage, ChatTurn, ChatBoxProps } from '../types';
 import { chatWithSources } from '../api';
+import { ArrowUp } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import { useEffect } from 'react';
 
-export default function ChatBox({ projectId, spaceId, isDisabled }: ChatBoxProps) {
+export default function ChatBox({ projectId, spaceIds, isDisabled }: ChatBoxProps) {
   const [input, setInput] = useState('');
   const [chatHistory, setChatHistory] = useState<ChatTurn[]>([]);
   const [loading, setLoading] = useState(false);
@@ -16,8 +19,8 @@ export default function ChatBox({ projectId, spaceId, isDisabled }: ChatBoxProps
     setLoading(true);
   
     try {
-      const data = await chatWithSources(spaceId, projectId, userMessage.content);
-  
+      const data = await chatWithSources(projectId, input, spaceIds);
+
       const assistantMessage: ChatMessage = {
         role: 'assistant',
         content: data.answer,
@@ -25,8 +28,7 @@ export default function ChatBox({ projectId, spaceId, isDisabled }: ChatBoxProps
   
       const newTurn: ChatTurn = {
         userMessage,
-        assistantMessage,
-        citations: data.citations,
+        assistantMessage
       };
   
       setChatHistory((prev) => [...prev, newTurn]);
@@ -41,7 +43,6 @@ export default function ChatBox({ projectId, spaceId, isDisabled }: ChatBoxProps
             role: 'assistant',
             content: '⚠️ Something went wrong while fetching the response.',
           },
-          citations: [],
         },
       ]);
     } finally {
@@ -49,52 +50,69 @@ export default function ChatBox({ projectId, spaceId, isDisabled }: ChatBoxProps
     }
   };  
 
+  function ThinkingAnimation() {
+    const [dots, setDots] = useState('');
+  
+    useEffect(() => {
+      const interval = setInterval(() => {
+        setDots((prev) => (prev.length < 3 ? prev + '.' : ''));
+      }, 400);
+      return () => clearInterval(interval);
+    }, []);
+  
+    return <div className="text-sm text-neutral-500 font-medium">Thinking{dots}</div>;
+  }
+
   return (
-    <div className="flex flex-col flex-grow h-full border rounded-lg p-4">
-      <div className="flex-1 overflow-y-auto space-y-4 mb-4 pr-1">
+    <div className="flex flex-col h-full border border-[#E0D8CF] rounded-lg p-4 bg-[#FAF9F5]">
+      <div className="flex-1 overflow-y-auto space-y-4 mb-4 scrollbar-thin scrollbar-thumb-[#8D7253] scrollbar-track-transparent pr-1">
         {chatHistory.map((turn, index) => (
           <div key={index} className="space-y-2">
             <div className="text-right">
-              <div className="bg-orange-100 p-2 rounded-lg inline-block max-w-[80%]">
+              <div className="bg-orange-100 p-2 rounded-lg inline-block max-w-[80%] text-sm">
                 {turn.userMessage.content}
               </div>
             </div>
             <div className="text-left">
-              <div className="bg-gray-100 p-2 rounded-lg inline-block max-w-[80%]">
-                {turn.assistantMessage.content}
+              <div className="text-sm whitespace-pre-wrap leading-relaxed">
+                <ReactMarkdown className="prose prose-sm max-w-none leading-snug [&_p]:my-2 [&_strong]:font-semibold">
+                  {turn.assistantMessage.content}
+                </ReactMarkdown>
               </div>
-              {turn.citations.length > 0 && (
-                <div className="text-xs text-muted-foreground mt-1">
-                  Sources: {turn.citations.map((c, i) => <span key={i}>[{c}] </span>)}
-                </div>
-              )}
             </div>
           </div>
         ))}
-        {loading && <div className="text-sm text-muted-foreground">Thinking…</div>}
+        {loading && <ThinkingAnimation />}
       </div>
 
-      <form onSubmit={handleSubmit} className="flex gap-2">
-        <input
-          type="text"
-          disabled={isDisabled || loading}
-          placeholder={
-            isDisabled
-              ? 'Select a research space with sources to start chatting'
-              : 'Ask a question about the selected sources…'
-          }
-          className={`flex-1 border rounded px-3 py-2 ${isDisabled ? 'bg-gray-100 cursor-not-allowed' : ''}`}
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-        />
-        <button
-          type="submit"
-          disabled={isDisabled || loading}
-          className="bg-orange-500 text-white rounded px-4 py-2 disabled:opacity-50"
-        >
-          Send
-        </button>
-      </form>
+      <div className="mt-auto w-full">
+        <div className="relative">
+          <form onSubmit={handleSubmit} className="relative w-full">
+            <input
+              type="text"
+              disabled={isDisabled || loading}
+              placeholder={
+                isDisabled
+                  ? 'Select a research space with sources to start chatting'
+                  : 'Ask a question about the selected sources…'
+              }
+              className={`w-full pr-12 pl-4 py-3 rounded-xl border border-[#D8CDBF] bg-white shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-[#8D7253] ${
+                isDisabled ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : ''
+              }`}
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+            />
+            <button
+              type="submit"
+              disabled={isDisabled || loading}
+              className="absolute bottom-2 right-2 bg-[#FF5400] hover:bg-[#e94c00] text-white p-2 rounded-full shadow-md disabled:opacity-50"
+            >
+              <ArrowUp size={16} />
+            </button>
+          </form>
+        </div>
+      </div>
+
     </div>
   );
 }

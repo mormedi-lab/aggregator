@@ -143,8 +143,8 @@ export async function checkHasProjectSources(projectId: string, spaceId: string)
   return await res.json(); 
 }
 
-export async function chatWithSources(spaceId: string, projectId: string, userMessage: string): Promise<{ answer: string; citations: string[] }> {
-  const res = await fetch(`${API}/space/${spaceId}/chat_with_sources`, {
+export async function chatWithSources(projectId: string, userMessage: string, spaceIds: string[]) { 
+  const res = await fetch(`${API}/chat_with_sources`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -152,6 +152,7 @@ export async function chatWithSources(spaceId: string, projectId: string, userMe
     body: JSON.stringify({
       project_id: projectId,
       user_message: userMessage,
+      space_ids: spaceIds,
     }),
   });
 
