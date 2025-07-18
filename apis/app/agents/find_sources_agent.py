@@ -5,7 +5,6 @@ import re
 import json
 from app.models.source import Source, Sources
 
-# Define the agent
 agent = Agent(
     name="FindSourcesAgent",
     instructions="""
@@ -19,6 +18,7 @@ agent = Agent(
     - "summary": (string) a 1–2 sentence explanation of why the article is relevant
     - "date_published": (string) in YYYY-MM-DD format
     - "url": (string) a direct link to the article
+    - "full_text": (string) a longer paragraph or excerpt from the article that best explains its key insights. This should be a few paragraphs, not the entire article.
 
     Your response MUST be a single raw JSON array and must NOT include any additional text, commentary, markdown, explanation, or formatting.
 
@@ -32,6 +32,8 @@ agent = Agent(
     tools=[WebSearchTool()]
 )
 
+MAX_FULLTEXT_CHARS = 6000  
+
 async def find_sources_from_prompt(search_prompt: str) -> List[Source]:
     result = await Runner.run(agent, search_prompt)
     raw_output = result.final_output
@@ -39,23 +41,22 @@ async def find_sources_from_prompt(search_prompt: str) -> List[Source]:
 
     try:
         parsed = json.loads(raw_output)
-        sources = Sources.model_validate({"sources": parsed}).sources
+    except json.JSONDecodeError as e:
+        print("❌ JSON decode failed:", e)
+        return []
 
-        return sources
+    valid_sources = []
+    for i, item in enumerate(parsed):
+        try:
+            # Trim full_text if too long
+            if "full_text" in item and isinstance(item["full_text"], str):
+                item["full_text"] = item["full_text"][:MAX_FULLTEXT_CHARS]
 
-    except (json.JSONDecodeError, ValidationError) as e:
-        print("❌ Initial parse or validation failed:", e)
+            source = Source.model_validate(item)
+            valid_sources.append(source)
 
-        match = re.search(r'\[\s*{.*?}\s*\]', raw_output, re.DOTALL)
-        if match:
-            try:
-                fallback = json.loads(match.group(0))
-                print("\n🧪 Extracted fallback JSON:\n", fallback)
-                fallback_sources = Sources.model_validate({"sources": fallback}).sources
+        except ValidationError as e:
+            print(f"⚠️ Skipping malformed source #{i}: {e}")
 
-                return fallback_sources
-
-            except (json.JSONDecodeError, ValidationError) as fallback_e:
-                print("❌ Fallback validation also failed:", fallback_e)
-
-    return []
+    print(f"✅ Parsed {len(valid_sources)} valid sources out of {len(parsed)}")
+    return valid_sources

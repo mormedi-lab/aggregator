@@ -14,6 +14,7 @@ def create_sources_for_space(tx: Transaction, space_id: str, sources: list[Sourc
                 headline: $headline,
                 url: $url,
                 summary: $summary,
+                full_text: $full_text,
                 is_trusted: $is_trusted,
                 date_published: $date_published
             })
@@ -25,6 +26,7 @@ def create_sources_for_space(tx: Transaction, space_id: str, sources: list[Sourc
             headline=source.headline,
             url=source.url,
             summary=source.summary or "No summary available",
+            full_text=source.full_text or "No full text available",
             is_trusted=source.is_trusted or False,
             date_published=source.date_published or "2025-01-01"
 )
@@ -39,6 +41,7 @@ def fetch_sources_for_space(tx: Transaction, space_id: str, project_id: str):
         src.headline AS headline,
         src.url AS url,
         src.summary AS summary,
+        src.full_text AS full_text,
         src.is_trusted AS is_trusted,
         src.date_published AS date_published,
         COUNT(p) > 0 AS is_in_project

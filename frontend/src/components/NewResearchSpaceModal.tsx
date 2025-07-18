@@ -32,7 +32,7 @@ export default function NewResearchSpaceModal({ isOpen, onClose, projectId, proj
       setSelectedIndustries(projectIndustries);
     }
   }, [isOpen, projectIndustries]);
-  
+
   const toggleIndustry = (industry: string) => {
     setSelectedIndustries((prev) =>
       prev.includes(industry)
@@ -51,7 +51,7 @@ export default function NewResearchSpaceModal({ isOpen, onClose, projectId, proj
 
   const handleSubmit = async () => {
     try {
-  
+
       const formData = {
         research_question: researchQuestion,
         industries: selectedIndustries,
@@ -62,9 +62,9 @@ export default function NewResearchSpaceModal({ isOpen, onClose, projectId, proj
         search_type: searchType,
         space_title: "",
       };
-  
+
       const space = await createResearchSpace(projectId, formData);
-  
+
       // Immediately go to the loading screen
       resetAndClose();
       navigate(`/project/${projectId}/space/${space.id}/loading`);
@@ -72,7 +72,7 @@ export default function NewResearchSpaceModal({ isOpen, onClose, projectId, proj
       console.error("Failed to create research space", err);
     }
   };
-  
+
   if (!isOpen) return null;
 
   return (

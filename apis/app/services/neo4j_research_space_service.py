@@ -27,7 +27,7 @@ def create_research_space_node(tx, project_id: str, space):
         query,
         project_id=project_id,
         id=space["id"],
-        search_query=space["query"],  
+        search_query=space["query"],
         search_type=space["search_type"],
         created_at=space["created_at"],
         research_question=space["research_question"],
@@ -38,6 +38,7 @@ def create_research_space_node(tx, project_id: str, space):
         additional_notes=space["additional_notes"],
         space_title=space["space_title"],
     )
+
 
 
 def fetch_research_spaces_for_project(tx: Transaction, project_id: str):
@@ -58,7 +59,7 @@ def fetch_research_spaces_for_project(tx: Transaction, project_id: str):
             "query": record["query"] or "",
             "search_type": record["search_type"],
             "created_at": record["created_at"].to_native() if hasattr(record["created_at"], "to_native") else record["created_at"],
-            "space_title": record["space_title"] or "", 
+            "space_title": record["space_title"] or "",
         }
         for record in result
     ]

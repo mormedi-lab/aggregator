@@ -65,6 +65,16 @@ export async function createResearchSpace(projectId: string, formData: {
   search_type: string;
   space_title: string;
 }) {
+export async function createResearchSpace(projectId: string, formData: {
+  research_question: string;
+  industries: string[];
+  geographies?: string[];
+  timeframe?: string;
+  insight_style?: string;
+  additional_notes?: string;
+  search_type: string;
+  space_title: string;
+}) {
   const response = await fetch(`${API}/project/${projectId}/spaces`, {
     method: "POST",
     headers: {
@@ -77,7 +87,7 @@ export async function createResearchSpace(projectId: string, formData: {
     throw new Error("Failed to create research space");
   }
 
-  return await response.json(); 
+  return await response.json();
 }
 
 
@@ -133,6 +143,25 @@ export async function checkHasProjectSources(projectId: string, spaceId: string)
   return await res.json(); 
 }
 
+export async function chatWithSources(projectId: string, userMessage: string, spaceIds: string[]) { 
+  const res = await fetch(`${API}/chat_with_sources`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      project_id: projectId,
+      user_message: userMessage,
+      space_ids: spaceIds,
+    }),
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch chat response");
+  }
+
+  return await res.json();
+}
 
 
 

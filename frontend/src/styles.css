@@ -20,3 +20,22 @@ body {
   height: 100%;
 }
 
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: #E0D8CF;
+  border-radius: 4px;
+}
+
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: #E0D8CF transparent;
+}
+
+
