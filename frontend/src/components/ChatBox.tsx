@@ -3,7 +3,7 @@ import { ChatMessage, ChatTurn, ChatBoxProps } from '../types';
 import { chatWithSources } from '../api';
 import { ArrowUp } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 export default function ChatBox({ projectId, spaceIds, isDisabled }: ChatBoxProps) {
   const [input, setInput] = useState('');
@@ -57,9 +57,17 @@ export default function ChatBox({ projectId, spaceIds, isDisabled }: ChatBoxProp
     return <div className="text-sm text-neutral-500 font-medium">Thinking{dots}</div>;
   }
 
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [chatHistory]);
+
   return (
     <div className="flex flex-col h-full border border-[#E0D8CF] rounded-lg p-4 bg-[#FAF9F5]">
-      <div className="flex-1 overflow-y-auto space-y-4 mb-4 scrollbar-thin scrollbar-thumb-[#8D7253] scrollbar-track-transparent pr-1">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto space-y-4 mb-4 scrollbar-thin scrollbar-thumb-[#8D7253] scrollbar-track-transparent pr-1">
         {chatHistory.map((turn, index) => (
           <div key={index} className="space-y-2">
             <div className="text-right">
