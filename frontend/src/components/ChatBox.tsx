@@ -15,40 +15,34 @@ export default function ChatBox({ projectId, spaceIds, isDisabled }: ChatBoxProp
     if (!input.trim()) return;
   
     const userMessage: ChatMessage = { role: 'user', content: input };
+    const newTurn: ChatTurn = { userMessage, assistantMessage: { role: 'assistant', content: '' } };
+    setChatHistory((prev) => [...prev, newTurn]);
     setInput('');
     setLoading(true);
   
     try {
       const data = await chatWithSources(projectId, input, spaceIds);
-
-      const assistantMessage: ChatMessage = {
-        role: 'assistant',
-        content: data.answer,
-      };
   
-      const newTurn: ChatTurn = {
-        userMessage,
-        assistantMessage
-      };
-  
-      setChatHistory((prev) => [...prev, newTurn]);
+      setChatHistory((prev) => {
+        const updated = [...prev];
+        updated[updated.length - 1].assistantMessage = { role: 'assistant', content: data.answer };
+        return updated;
+      });
     } catch (error) {
       console.error('Error during chat:', error);
   
-      setChatHistory((prev) => [
-        ...prev,
-        {
-          userMessage,
-          assistantMessage: {
-            role: 'assistant',
-            content: '⚠️ Something went wrong while fetching the response.',
-          },
-        },
-      ]);
+      setChatHistory((prev) => {
+        const updated = [...prev];
+        updated[updated.length - 1].assistantMessage = {
+          role: 'assistant',
+          content: '⚠️ Something went wrong while fetching the response.',
+        };
+        return updated;
+      });
     } finally {
       setLoading(false);
     }
-  };  
+  };    
 
   function ThinkingAnimation() {
     const [dots, setDots] = useState('');
