@@ -55,16 +55,7 @@ export async function findSources(prompt: string) {
   if (!res.ok) throw new Error("Failed to find sources");
 }
 
-export async function createResearchSpace(projectId: string, formData: {
-  research_question: string;
-  industries: string[];
-  geographies?: string[];
-  timeframe?: string;
-  insight_style?: string;
-  additional_notes?: string;
-  search_type: string;
-  space_title: string;
-}) {
+
 export async function createResearchSpace(projectId: string, formData: {
   research_question: string;
   industries: string[];

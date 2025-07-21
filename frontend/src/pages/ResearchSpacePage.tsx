@@ -10,6 +10,7 @@ export default function ResearchSpacePage() {
   const [space, setSpace] = useState<ResearchSpace | null>(null);
   const [sources, setSources] = useState<Source[]>([]);
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
 
   const handleAddSource = async (sourceId: string) => {
     try {
@@ -34,15 +35,13 @@ export default function ResearchSpacePage() {
         setSources(res.sources);
       } catch (err) {
         console.error("Failed to load sources", err);
-      }
-        console.error("Failed to load sources", err);
       } finally {
         setLoading(false);
       }
     };
   
     if (projectId && spaceId) loadSpaceAndSources();
-  }, [projectId, spaceId]);  
+  }, [projectId, spaceId]);
 
   if (loading || !space) {
     return (
