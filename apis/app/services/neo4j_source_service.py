@@ -48,11 +48,19 @@ def fetch_sources_for_space(tx: Transaction, space_id: str, project_id: str):
     ORDER BY src.date_published DESC
     """
     result = tx.run(query, {"space_id": space_id, "project_id": project_id})
-    return [record.data() for record in result]
+    return [{**record.data(), "space_id": space_id} for record in result]
+
 
 def create_link_to_project(tx, project_id: str, source_id: str):
     query = """
     MATCH (p:Project {id: $project_id}), (s:Source {id: $source_id})
     MERGE (p)-[:INCLUDES]->(s)
+    """
+    tx.run(query, {"project_id": project_id, "source_id": source_id})
+
+def remove_link_to_project(tx, project_id: str, source_id: str):
+    query = """
+    MATCH (p:Project {id: $project_id})-[r:INCLUDES]->(s:Source {id: $source_id})
+    DELETE r
     """
     tx.run(query, {"project_id": project_id, "source_id": source_id})

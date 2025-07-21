@@ -154,6 +154,22 @@ export async function chatWithSources(projectId: string, userMessage: string, sp
   return await res.json();
 }
 
+export async function removeSourceFromProject(spaceId: string, projectId: string, sourceId: string) {
+  const res = await fetch(
+    `${API}/space/${spaceId}/remove_source_from_project?project_id=${projectId}&source_id=${sourceId}`,
+    {
+      method: "DELETE",
+    }
+  );
+
+  if (!res.ok) {
+    throw new Error("Failed to remove source from project");
+  }
+
+  return await res.json();
+}
+
+
 
 
 

@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { checkHasProjectSources, deleteResearchSpace, fetchProjectById, fetchSourcesForSpace } from "../api";
+import { checkHasProjectSources, deleteResearchSpace, fetchProjectById, fetchSourcesForSpace, removeSourceFromProject } from "../api";
 import NewResearchSpaceModal from "../components/NewResearchSpaceModal";
 import { fetchResearchSpaces } from "../api";
 import ResearchSpaceCard from "../components/ResearchSpaceCard";
@@ -101,6 +101,15 @@ export default function ProjectDashboardPage() {
       console.error("Error checking source links", err);
     }
   };
+
+  const handleRemoveSource = async (spaceId: string, sourceId: string) => {
+    try {
+      await removeSourceFromProject(spaceId, projectId, sourceId);
+      setSelectedSources((prev) => prev.filter((s) => s.id !== sourceId));
+    } catch (err) {
+      console.error("❌ Failed to remove source from project", err);
+    }
+  };  
    
   return (
     <div className="h-screen overflow-hidden bg-[#FAF9F5] flex flex-col">
@@ -196,7 +205,13 @@ export default function ProjectDashboardPage() {
               ) : (
                 <div className="grid grid-cols-1 gap-3">
                   {selectedSources.map((source) => (
-                    <SourceCard key={source.id} source={source} variant="added" onAdd={() => {}} />
+                    <SourceCard 
+                      key={source.id} 
+                      source={source} 
+                      variant="added" 
+                      onAdd={() => {}} 
+                      onRemove={() => handleRemoveSource(source.space_id!, source.id)}
+                    />
                   ))}
                 </div>
               )}

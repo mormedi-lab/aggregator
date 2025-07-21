@@ -1,7 +1,7 @@
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { fetchResearchSpaceById,  fetchSourcesForSpace, addSourceToProject } from "../api";
+import { fetchResearchSpaceById,  fetchSourcesForSpace, addSourceToProject, removeSourceFromProject } from "../api";
 import { Source, ResearchSpace } from "../types";
 import SourceCard from "../components/SourceCard";
 
@@ -25,6 +25,15 @@ export default function ResearchSpacePage() {
     }
   };
 
+  const handleRemoveSource = async (sourceId: string) => {
+    try {
+      await removeSourceFromProject(spaceId!, projectId!, sourceId);
+      const data = await fetchSourcesForSpace(spaceId!, projectId!);
+      setSources(data.sources);
+    } catch (err) {
+      console.error("❌ Failed to remove source from project", err);
+    }
+  };  
 
   useEffect(() => {
     const loadSpaceAndSources = async () => {
@@ -88,6 +97,7 @@ export default function ResearchSpacePage() {
                 source={source}
                 variant={source.is_in_project ? "added" : "explore"}
                 onAdd={() => handleAddSource(source.id)}
+                onRemove={() => handleRemoveSource(source.id)}
               />
             ))}
           </div>

@@ -15,6 +15,7 @@ export interface Source {
     summary: string;
     is_trusted?: boolean;
     is_in_project?: boolean;
+    space_id?: string;
   }
   
   export interface ResearchSpace {
@@ -65,6 +66,7 @@ export interface Source {
     source: Source;
     variant?: "added" | "explore";
     onAdd?: () => void;
+    onRemove?: () => void;
   }
   
   export interface DeleteResearchSpaceWarningModalProps {

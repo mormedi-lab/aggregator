@@ -9,7 +9,7 @@ from app.config import SessionNeo4j, load_conf
 from app.models.source import Source, Sources, AddSourceRequest
 
 from app.agents.find_sources_agent import find_sources_from_prompt
-from app.services.neo4j_source_service import create_sources_for_space, fetch_sources_for_space, create_link_to_project
+from app.services.neo4j_source_service import create_sources_for_space, fetch_sources_for_space, create_link_to_project, remove_link_to_project
 from app.services.neo4j_research_space_service import fetch_single_research_space_by_id
 
 router = APIRouter()
@@ -55,6 +55,15 @@ async def add_source_to_project(session: SessionNeo4j, space_id: str, request: A
     try:
         session.write_transaction(create_link_to_project, request.project_id, request.source_id)
         return {"message": "Source added to project", "source_id": request.source_id}
+    except Exception as e:
+        print("🔥 ERROR:", str(e))
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+@router.delete("/space/{space_id}/remove_source_from_project")
+async def remove_source_from_project(session: SessionNeo4j, space_id: str, project_id: str, source_id: str) -> dict:
+    try:
+        session.write_transaction(remove_link_to_project, project_id, source_id)
+        return {"message": "Source removed from project", "source_id": source_id}
     except Exception as e:
         print("🔥 ERROR:", str(e))
         raise HTTPException(status_code=500, detail="Internal server error")
