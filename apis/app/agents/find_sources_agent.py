@@ -32,7 +32,26 @@ agent = Agent(
     tools=[WebSearchTool()]
 )
 
-MAX_FULLTEXT_CHARS = 6000  
+MAX_FULLTEXT_CHARS = 2000
+
+def try_recover_partial_json(raw_output: str) -> list:
+    """
+    Attempts to extract partial JSON array from a malformed string by:
+    - Locating the array start (`[`)
+    - Trying to parse each object individually
+    """
+    raw_output = raw_output.strip()
+    potential_objs = re.findall(r"{.*?}", raw_output, flags=re.DOTALL)
+
+    parsed_objects = []
+    for i, raw_obj in enumerate(potential_objs):
+        try:
+            obj = json.loads(raw_obj)
+            parsed_objects.append(obj)
+        except json.JSONDecodeError as e:
+            print(f"⚠️ Skipping malformed object #{i}: {e}")
+
+    return parsed_objects
 
 async def find_sources_from_prompt(search_prompt: str) -> List[Source]:
     result = await Runner.run(agent, search_prompt)
@@ -43,7 +62,8 @@ async def find_sources_from_prompt(search_prompt: str) -> List[Source]:
         parsed = json.loads(raw_output)
     except json.JSONDecodeError as e:
         print("❌ JSON decode failed:", e)
-        return []
+        print("⚠️ Attempting partial recovery")
+        parsed = try_recover_partial_json(raw_output)
 
     valid_sources = []
     for i, item in enumerate(parsed):
