@@ -77,3 +77,19 @@ export interface Source {
   export interface IndustryPillProps {
     label: string;
   }
+
+  export interface ChatBoxProps {
+    projectId: string;
+    spaceIds: string[];
+    isDisabled: boolean;
+  }
+
+  export interface ChatMessage {
+    role: 'user' | 'assistant';
+    content: string;
+  }
+  
+  export interface ChatTurn {
+    userMessage: ChatMessage;
+    assistantMessage: ChatMessage;
+  }

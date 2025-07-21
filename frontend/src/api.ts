@@ -55,6 +55,7 @@ export async function findSources(prompt: string) {
   if (!res.ok) throw new Error("Failed to find sources");
 }
 
+
 export async function createResearchSpace(projectId: string, formData: {
   research_question: string;
   industries: string[];
@@ -77,7 +78,7 @@ export async function createResearchSpace(projectId: string, formData: {
     throw new Error("Failed to create research space");
   }
 
-  return await response.json(); 
+  return await response.json();
 }
 
 
@@ -133,6 +134,25 @@ export async function checkHasProjectSources(projectId: string, spaceId: string)
   return await res.json(); 
 }
 
+export async function chatWithSources(projectId: string, userMessage: string, spaceIds: string[]) { 
+  const res = await fetch(`${API}/chat_with_sources`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      project_id: projectId,
+      user_message: userMessage,
+      space_ids: spaceIds,
+    }),
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch chat response");
+  }
+
+  return await res.json();
+}
 
 
 

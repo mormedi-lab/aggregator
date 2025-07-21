@@ -35,6 +35,8 @@ def get_neo4j_session():
     user = load_conf("NEO4J_USERNAME")
     password = load_conf("NEO4J_PASSWORD")
 
+    print("✅ Connecting to Neo4j at", uri, "with user", user)
+
     # TODO: replace by logging
     print(f"# Neo4j URI: {uri}")
     # runs queries against the graph DB

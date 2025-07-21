@@ -39,6 +39,7 @@ async def find_sources_for_space(session: SessionNeo4j, space_id: str) -> Source
             headline=s.headline,
             url=s.url,
             summary=s.summary or "",
+            full_text=s.full_text or "",
             is_trusted=False,
         )
         for s in sources
