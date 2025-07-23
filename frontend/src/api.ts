@@ -44,17 +44,10 @@ export async function fetchProjectById(id: string) {
   return res.json();
 }
 
-export async function generatePrompt(projectId: string) {
-  const res = await fetch(`${API}/generate_prompt?project_id=${projectId}`);
-  if (!res.ok) throw new Error("Failed to generate prompt");
-  return res.json();
-}
-
 export async function findSources(prompt: string) {
   const res = await fetch(`${API}/find_sources?search_prompt=${encodeURIComponent(prompt)}`);
   if (!res.ok) throw new Error("Failed to find sources");
 }
-
 
 export async function createResearchSpace(projectId: string, formData: {
   research_question: string;

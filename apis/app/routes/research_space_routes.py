@@ -7,11 +7,11 @@ from app.config import SessionNeo4j
 from app.models.research_space import CreateResearchSpaceRequest, ResearchSpaceResponse, ResearchSpace
 from app.models.source import Sources, Source
 from app.models.response import StatusResponse
-from app.services.neo4j_research_space_service import fetch_research_spaces_for_project, create_research_space_node, fetch_single_research_space_by_id, delete_research_space_and_sources, fetch_project_sources_for_space
+from app.services.neo4j_research_space_service import fetch_research_spaces_for_project, create_research_space_node, fetch_single_research_space_by_id, delete_research_space_and_sources, fetch_project_sources_for_space, update_prompt_for_space
 from app.services.neo4j_source_service import create_sources_for_space
-from app.agents.prompt_generator_agent import generate_prompt
 from app.agents.find_sources_agent import find_sources_from_prompt
 from app.agents.generate_space_title_agent import generate_space_title
+from app.agents.prompt_generator_agent import generate_prompt
 
 
 router = APIRouter()
@@ -39,6 +39,10 @@ async def create_research_space(session: SessionNeo4j, project_id: str, body: Cr
     }
 
     session.write_transaction(create_research_space_node, project_id, space)
+
+    prompt = await generate_prompt(ResearchSpace(**space))
+    print("🧠 GENERATED PROMPT:", prompt) 
+    session.write_transaction(update_prompt_for_space, space_id, prompt)
 
     return ResearchSpace(**space)
 

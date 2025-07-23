@@ -9,8 +9,10 @@ from app.models.research_space import ResearchSpace
 
 router = APIRouter()
 
+#CURRENTLY NOT USED
 @router.post("/space/{space_id}/generate_prompt")
 async def generate_prompt_for_space(session: SessionNeo4j, space_id: str):
+    print(f"📥 HIT: /space/{space_id}/generate_prompt")
     # Fetch the full ResearchSpace node
     space = session.read_transaction(fetch_single_research_space_by_id, space_id)
     if not space:

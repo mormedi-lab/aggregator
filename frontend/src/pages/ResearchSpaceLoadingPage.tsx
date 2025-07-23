@@ -7,6 +7,8 @@ export default function ResearchSpaceLoadingPage() {
   const API = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
+    console.log("🚀 Mounting ResearchSpaceLoadingPage");
+
     const runPipeline = async () => {
       const DELAY_MS = 1500;
       const MAX_RETRIES = 20;
@@ -18,12 +20,8 @@ export default function ResearchSpaceLoadingPage() {
       }
 
       try {
-        // 1. Generate prompt
-        await fetch(`${API}/space/${spaceId}/generate_prompt`, {
-          method: "POST",
-        });
 
-        // 2. Fetch sources from LLM
+        // 1.Generate prompt and find sources
         await fetch(`${API}/space/${spaceId}/find_sources`, {
           method: "POST",
         });
